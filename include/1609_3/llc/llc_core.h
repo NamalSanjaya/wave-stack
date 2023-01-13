@@ -2,6 +2,7 @@
 #define _WAVE_LLC_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define MSDU_MAXSIZE 2304  /* in octets */
 

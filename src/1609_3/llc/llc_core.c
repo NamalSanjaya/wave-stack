@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../../include/1609_3/wave_llc.h"
-#include "../../include/wave_encode.h"
+#include "../../../include/1609_3/llc/llc_core.h"
+#include "../../../include/wave_encode.h"
 
 wave_llc_pdu_metadata *wave_init_llc_pdu_metadata(uint16_t ethertype){
     wave_llc_pdu_metadata *ptr = malloc(sizeof(wave_llc_pdu_metadata));
