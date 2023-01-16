@@ -2,7 +2,9 @@
 #define _WAVE_LLC_H
 
 #include <stdint.h>
+#include "../pdu_buf.h"
 
+/* TODO: WsmMaxLength and this variable is similary which is maintain under MIB */
 #define MSDU_MAXSIZE 2304  /* in octets */
 
 #define WAVE_LLC_DSAP 0xAA
@@ -13,7 +15,7 @@
 #define WAVE_LLC_ETHERTYPE_WAVE 0x88DC
 
 /* This will be used to create LLC PDU(MSDU) which is inserted into data field of MA-UNITDATAX.request' */
-typedef struct wave_llc_pdu_metadata {
+typedef struct llc_pdu_metadata {
     uint8_t dsap;
     uint8_t ssap;
     uint8_t control;
@@ -21,11 +23,18 @@ typedef struct wave_llc_pdu_metadata {
     uint16_t ethertype;
     uint16_t len;
     uint8_t *data;
-} wave_llc_pdu_metadata;
+} llc_pdu_metadata;
 
-wave_llc_pdu_metadata *wave_init_llc_pdu_metadata(uint16_t ethertype);
-void wave_print_llc_pdu_metadata(const wave_llc_pdu_metadata *self);
-uint8_t *wave_llc_encode(const wave_llc_pdu_metadata *self, size_t *cnt, int *err);
-void wave_free_llc_pdu_metadata(wave_llc_pdu_metadata *self);
+/* Time Slot */
+enum time_slot {
+    time_slot0, time_slot1
+};
+
+llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype, uint8_t *data, uint16_t count);
+void print_llc_pdu_metadata(const llc_pdu_metadata *self);
+void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err);
+void free_llc_pdu_metadata(llc_pdu_metadata *self);
+void dl_unitdatax_req(wave_pdu *pdu, char *src_addr, char *dest_addr, uint8_t prority, uint8_t chan_id, 
+    enum time_slot timeslot, uint8_t data_rate, uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time, uint8_t *data, uint16_t count);
 
 #endif  /* _WAVE_LLC_H */
