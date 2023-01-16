@@ -13,7 +13,7 @@ void show_pdu(wave_pdu *self){
 }
 
 /**
- * create pdu_buf and return data structure called pdu to handle pdu_buf.
+ * create pdu_buf and return data structure called wave_pdu to handle pdu_buf.
  * pdu.current - upto where data is filled.
  * pdu.offset - offset from pdu.current to pdu.end in octets.
  */

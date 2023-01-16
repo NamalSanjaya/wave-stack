@@ -4,30 +4,26 @@
 #include <string.h>
 #include "../../include/1609_3/wave_llc.h"
 #include "../../include/wave_encode.h"
+#include "../../include/pdu_buf.h"
+#include "../../include/fmt_error.h"
 
-wave_llc_pdu_metadata *wave_init_llc_pdu_metadata(uint16_t ethertype){
-    wave_llc_pdu_metadata *ptr = malloc(sizeof(wave_llc_pdu_metadata));
-    if(ptr == NULL){
-        fprintf(stderr, "unable to allocate memory to create LLC PDU metadata\n");
-        exit(EXIT_FAILURE);
-    }
+llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype, uint8_t *data, uint16_t count){
+    llc_pdu_metadata *ptr = malloc(sizeof(llc_pdu_metadata));
+    if(ptr == NULL) fmt_panic("unable to allocate memory to create LLC PDU metadata\n");
     ptr->dsap = 0xAB;
     ptr->ssap = 0xAB;
-    ptr->control=0x03;
-    ptr->oui[0]= 0x00;
-    ptr->oui[1]= 0x00;
-    ptr->oui[2]= 0x00;
+    ptr->control = 0x03;
+    ptr->oui[0] = 0x00;
+    ptr->oui[1] = 0x00;
+    ptr->oui[2] = 0x00;
     ptr->ethertype = ethertype;
-
-    char llc_sdu[] = "sample-hello-world";
-    ptr->len  = strlen(llc_sdu);
+    ptr->len  = count;
     ptr->data = calloc(ptr->len, 1);
-    memcpy(ptr->data, llc_sdu, ptr->len);
-
+    memcpy(ptr->data, data, count);
     return ptr;
 }
 
-void wave_print_llc_pdu_metadata(const wave_llc_pdu_metadata *self){
+void print_llc_pdu_metadata(const llc_pdu_metadata *self){
     printf("DSAP      : %X\n", self->dsap);
     printf("SSAP      : %X\n", self->ssap);
     printf("Control   : %x\n", self->control);
@@ -43,38 +39,42 @@ void wave_print_llc_pdu_metadata(const wave_llc_pdu_metadata *self){
     printf("\nllc pdu metadata printing finished\n");
 }
 
-void wave_free_llc_pdu_metadata(wave_llc_pdu_metadata *self){
+void free_llc_pdu_metadata(llc_pdu_metadata *self){
     free(self);
 }
 
-uint8_t *wave_llc_encode(const wave_llc_pdu_metadata *self, size_t *cnt, int *err){
-    uint8_t buf[MSDU_MAXSIZE];
-    uint8_t *ret;
-    size_t i[1];
-
-    *i = 0;
-    *cnt = 0;
+void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err){
     *err = 0;
 
-    if( WAVE_LLC_OUI != ((self->oui[0] << 16)| (self->oui[1] << 8)| self->oui[2])) {
-        fprintf(stderr, "--error--");
-        goto out;
+    if(WAVE_LLC_OUI != ((self->oui[0] << 16)| (self->oui[1] << 8)| self->oui[2])) {
+        fmt_error(WAVE_WARN, "unsupported OUI field given to encode LLC PDU");
+        return;
     }
     if(self->ethertype != WAVE_LLC_ETHERTYPE_IP && self->ethertype != WAVE_LLC_ETHERTYPE_WAVE){
-        fprintf(stderr ,"----error---");
-        goto out;
+        fmt_error(WAVE_WARN, "unsupported Ethertype field given to encode LLC PDU");
+        return;
     }
-    wave_store_uint8(buf, i, WAVE_LLC_DSAP, MSDU_MAXSIZE, err);       /* DSAP field */
-    wave_store_uint8(buf, i, WAVE_LLC_SSAP, MSDU_MAXSIZE, err);      /* SSAP field */
-    wave_store_uint8(buf, i, WAVE_LLC_CONTROL, MSDU_MAXSIZE, err);   /* Control field */
-    wave_store_uint8_n(buf, i, 3, self->oui, MSDU_MAXSIZE, err);     /* OUI field*/
-    wave_store_uint16(buf, i, self->ethertype, MSDU_MAXSIZE, err);   /* ethertype field*/
-    wave_store_uint8_n(buf, i, self->len, self->data, MSDU_MAXSIZE, err);   /* WSM Data field*/
-out:
-    ret = calloc(*i, 1);
-    memcpy(ret, buf, *i);
-    *cnt = *i;
+    store_uint8_n(pdu, self->len, self->data, err);   /* WSM Data field */
+    store_uint16(pdu, self->ethertype, err);   /* ethertype field */
+    store_uint8_n(pdu, 3, self->oui, err);     /* OUI field */
+    store_uint8(pdu, WAVE_LLC_CONTROL, err);   /* Control field */
+    store_uint8(pdu, WAVE_LLC_SSAP, err);      /* SSAP field */
+    store_uint8(pdu, WAVE_LLC_DSAP, err);      /* DSAP field */
+}
 
-    printf("\nencoding finished\n");
-    return ret;
+/* TODO: Need to decide the return type. we can input an error pointer and can check its states */
+/* Issued by WSMP layer to request that LSDU to be sent to Multi-Channel operation layer */
+void dl_unitdatax_req(wave_pdu *pdu, char *src_addr, char *dest_addr, uint8_t prority, uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate,
+    uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time, uint8_t *data, uint16_t count){
+    /* most of parameters coming from WSMP layer. They have checked once. Only new parameters are src_addr, txpwr_level. */
+    /* src_addr, dest_addr, prority, channel_Id etc won't use to encode at LLC. But there will be pass to MAC layer functions */
+    /* WSMP Header + WSM data <= WSM Max Length */
+    uint16_t ethertype = 0x88DC; /* default to WSMP */
+    int myerr=0;
+    int *err=&myerr;
+    llc_pdu_metadata *llc_metadata = init_llc_pdu_metadata(ethertype, data, count);
+    llc_encode(llc_metadata, pdu, err);
+
+    /* TODO: need to send pdu with relavent parameter to multi channel operational layer running in kernel space */
+    free_llc_pdu_metadata(llc_metadata); // put very end
 }
