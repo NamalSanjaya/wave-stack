@@ -327,10 +327,10 @@ struct wsmp_iex *create_n_iex(uint8_t chan_id, uint8_t data_rate, int8_t tx_pow,
      iex->data_rate = data_rate;
      iex->tx_pow = tx_pow;
      iex->channel_load = channel_load;
-     if (chan_id == 0) iex->count++
-     if (data_rate == 0) iex->count++
-     if (tx_pow == 0) iex->count++
-     if (channel_load == 0) iex->count++
+     if (chan_id != 0) iex->count++;
+     if (data_rate != 0) iex->count++;
+     if (tx_pow != 0) iex->count++;
+     if (channel_load != 0) iex->count++;
      return iex;
 };
 
