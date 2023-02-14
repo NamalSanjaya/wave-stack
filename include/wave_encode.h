@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include "pdu_buf.h"
+#include "./pdu_buf.h"
 
 void store_uint8(wave_pdu *pdu, const uint8_t v, int *err);
 void store_uint16(wave_pdu *pdu, const uint16_t v, int *err);

@@ -22,7 +22,7 @@ llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype, uint8_t *data, uint1
     memcpy(ptr->data, data, count);
     return ptr;
 }
-
+/* debug function to print each field in llc frame */
 void print_llc_pdu_metadata(const llc_pdu_metadata *self){
     printf("DSAP      : %X\n", self->dsap);
     printf("SSAP      : %X\n", self->ssap);
@@ -63,6 +63,7 @@ void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err){
 }
 
 /* TODO: Need to decide the return type. we can input an error pointer and can check its states */
+/* TODO: Power is signed integer. check it again */
 /* Issued by WSMP layer to request that LSDU to be sent to Multi-Channel operation layer */
 void dl_unitdatax_req(wave_pdu *pdu, char *src_addr, char *dest_addr, uint8_t prority, uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate,
     uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time, uint8_t *data, uint16_t count){
