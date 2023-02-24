@@ -51,7 +51,7 @@ pcap_t *wsmp_if_init(const char *ifname) {
      return pcap;
 }
 
-int wsmp_if_send(const struct wsmp_wsm *msg, wave_pdu *pdu, const char *ifname, pcap_t *pcap) {
+int wsmp_if_send(wave_pdu *pdu, const char *ifname, pcap_t *pcap) {
      struct ether_header hdr;
      hdr.ether_type = htons(0x88DC);
      memset(hdr.ether_dhost, 0xFF, sizeof(hdr.ether_dhost));
@@ -91,25 +91,17 @@ int wsmp_if_send(const struct wsmp_wsm *msg, wave_pdu *pdu, const char *ifname, 
      memcpy(hdr.ether_shost, src_mac, sizeof(hdr.ether_shost));
      close(fd);
 
-
-     int wsm_err = 0;
-     // uint8_t *wsm = wsmp_wsm_encode(msg, &wsm_cnt, &wsm_err, WSMP_MODE);
-     wsmp_wsm_encode(msg, pdu, &wsm_err, WSMP_MODE);
-
-     if (wsm_err) {
-	  fprintf(stderr, "ERROR:\twsmp_if_send | wsm_err\n");
-	  return EXIT_FAILURE;
-     }
-
      unsigned char frame[sizeof(struct ether_header) + pdu->offset];
      memcpy(frame, &hdr, sizeof(struct ether_header));
      memcpy(frame + sizeof(struct ether_header), pdu->current, pdu->offset);
 
-     if (pcap_inject(pcap, frame, sizeof(frame)) == -1) { // BREAK HERE
+     uint8_t frame2[pdu->offset];
+     memcpy(frame2, pdu->current, pdu->offset);
+
+     if (pcap_inject(pcap, frame2, sizeof(frame2)) == -1) { // BREAK HERE
 	  pcap_perror(pcap, 0);
 	  return EXIT_FAILURE;
      }
-
      return EXIT_SUCCESS;
 }
 
@@ -122,15 +114,18 @@ int main() {
 	     return EXIT_FAILURE;
      }
 
-     struct wsmp_wsm *msg = gen_wsm_metadata();
-     int i;
-     for (i = 0; i < 100; i++) {
-          wave_pdu *pdu = create_pdu_buf();
-	     printf("%d\n", wsmp_if_send(msg, pdu, device, pcap));
-          free_pbuf(pdu);
+     wave_pdu *pdu = gen_wsm_waveshortmsg_req();
+     if (pdu==NULL){
+          fprintf(stderr, "Failed to serve the wsm creation request.\n");
+	     return EXIT_FAILURE;
      }
 
-	free_wsm(msg);
+     int i;
+     for (i = 0; i < 100; i++) {
+	     printf("%d\n", wsmp_if_send(pdu, device, pcap));
+     }
+
+     free_pbuf(pdu);
      pcap_close(pcap);
 
      return EXIT_SUCCESS;

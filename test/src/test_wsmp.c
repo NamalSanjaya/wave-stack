@@ -19,6 +19,9 @@
 */
 
 #include "../include/test_wsmp.h"
+#include "../../include/1609_3/wsmp.h"
+#include "../../include/pdu_buf.h"
+#include "../../include/1609_3/wave_llc.h"
 
 void print_iex(struct wsmp_iex *iex) {
      printf("\n---- fields in wsmp_iex struct ----\n");
@@ -147,6 +150,21 @@ void print_wsm(struct wsmp_wsm *wsm) {
      printf("\n-- END WSM --\n");
 }
 
+// print binary format of 1-byte value
+void print_bin8(uint8_t value){
+    for (int i = 7; i >= 0; i--)
+        printf("%d", (value & (1 << i)) >> i );
+    printf(",");
+}
+
+// print binary format for a given size.
+void print_binx(uint8_t *buf, size_t size){
+    for (size_t i = 0; i < size; i++){
+        print_bin8(*(buf+i));
+    }
+    printf("\n");
+}
+
 struct wsmp_wsm *gen_wsm_metadata(){
      uint8_t subtype = 0, opt_indicator = 1, tpid=0, chat_id=172, data_rate=0x0C;
      int8_t tx_power=0x9E;
@@ -155,9 +173,28 @@ struct wsmp_wsm *gen_wsm_metadata(){
      uint8_t *data = calloc(11, sizeof(char));
      char *msg = "hello-world";
      if (data==NULL){
-          fprintf(stderr, "could not allocate memory");
+          fprintf(stderr, "could not allocate memory\n");
           exit(1);
      }
      memcpy(data, msg, len);
      return create_wsmp_metadata(subtype, tpid, opt_indicator, chat_id, data_rate, tx_power, psid, len, data);
 }
+
+wave_pdu *gen_wsm_waveshortmsg_req(){
+     uint8_t info_element_indicator=1, chan_id=172, data_rate=0x0C, chan_load=1, prority = 2;
+     int8_t tx_power=0x9E;
+     uint64_t wsm_exptime = 1000;
+     enum time_slot tmslot = time_slot0;
+     uint8_t *peer_macaddr = 0x1166aabbdd22;
+     uint32_t psid = 0xC00305;
+     uint16_t len = 11;
+     uint8_t *data = calloc(len, sizeof(char));
+     char *msg = "hello-world";
+     if (data==NULL){
+          fprintf(stderr, "could not allocate memory\n");
+          return NULL;
+     }
+     memcpy(data, msg, len);
+     return wsm_waveshortmsg_req(chan_id, tmslot, data_rate, tx_power, chan_load, info_element_indicator, prority, wsm_exptime, len, data, peer_macaddr, psid);
+}
+

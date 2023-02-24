@@ -3,7 +3,11 @@
 
 #include "../../include/1609_3/wsmp.h"
 
+void print_bin8(uint8_t value);
+void print_binx(uint8_t *buf, size_t size);
+
 void print_wsm(struct wsmp_wsm *wsm);
 struct wsmp_wsm *gen_wsm_metadata();
+wave_pdu *gen_wsm_waveshortmsg_req();
 
 #endif /* _TEST_WSMP_H */
