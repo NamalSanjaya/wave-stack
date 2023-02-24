@@ -52,9 +52,11 @@
 #include <stdlib.h>
 #include "../../include/1609_3/wsmp.h"
 #include "../include/test_wsmp.h"
+#include "../../include/1609_3/wsmp_encode.h"
+#include "../../include/pdu_buf.h"
 
 int main(){
-    uint8_t subtype = 0, opt_indicator = 1, tpid=0, chat_id=172, data_rate=0x0C, channel_load=22;
+    uint8_t subtype = 0, opt_indicator = 1, tpid=0, chat_id=172, data_rate=0x0C;
     int8_t tx_power=0x9E;
     uint32_t psid = 0xC00305;
     uint16_t len = 11;
@@ -65,6 +67,18 @@ int main(){
         exit(1);
     }
     data = msg;
-    struct wsmp_wsm *wsm_metadata = create_wsmp_metadata(subtype, tpid, opt_indicator, chat_id, data_rate, tx_power, channel_load, psid, len, data);
-    print_wsm(wsm_metadata);
+    struct wsmp_wsm *wsm_metadata = create_wsmp_metadata(subtype, tpid, opt_indicator, chat_id, data_rate, tx_power, psid, len, data);
+    wave_pdu *pdu = create_pdu_buf();
+    printf("\n--before encoding--\n");
+    show_pdu(pdu);
+    int gerr = 0;
+    int *err = &gerr;
+    wsmp_wsm_encode(wsm_metadata, pdu, err, WSMP_STRICT);
+    if(*err) {
+        fprintf(stderr, "went wrong in encoding %d", *err);
+        exit(1);
+    }
+    printf("\n--after encoding--\n");
+    show_pdu(pdu);
+    free_pbuf(pdu);
 }

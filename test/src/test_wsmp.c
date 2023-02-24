@@ -146,3 +146,18 @@ void print_wsm(struct wsmp_wsm *wsm) {
 
      printf("\n-- END WSM --\n");
 }
+
+struct wsmp_wsm *gen_wsm_metadata(){
+     uint8_t subtype = 0, opt_indicator = 1, tpid=0, chat_id=172, data_rate=0x0C;
+     int8_t tx_power=0x9E;
+     uint32_t psid = 0xC00305;
+     uint16_t len = 11;
+     uint8_t *data = calloc(11, sizeof(char));
+     char *msg = "hello-world";
+     if (data==NULL){
+          fprintf(stderr, "could not allocate memory");
+          exit(1);
+     }
+     memcpy(data, msg, len);
+     return create_wsmp_metadata(subtype, tpid, opt_indicator, chat_id, data_rate, tx_power, psid, len, data);
+}
