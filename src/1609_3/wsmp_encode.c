@@ -621,6 +621,6 @@ void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, int *err, int m
      _s_n(buf, i, curs->len, curs->data, WSMP_MAXSIZE, err);
 
 out:
-	add_data_to_pbuf(pdu, buf, *i);
+	add_data_to_pbuf(pdu, buf, *i, err);
     return ;
 }

@@ -10,7 +10,7 @@ void store_uint8(wave_pdu *pdu, const uint8_t v, int *err){
 	    return;
     }
     uint8_t temp = v;
-    add_data_to_pbuf(pdu, &temp, 1);
+    add_data_to_pbuf(pdu, &temp, 1, err);
 }
 
 void store_uint16(wave_pdu *pdu, const uint16_t v, int *err){
