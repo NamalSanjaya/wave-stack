@@ -19,6 +19,11 @@
  */
 
 #include "../../include/1609_3/wsmp.h"
+#include "../../include/1609_3/wave_llc.h"
+#include "../../include/1609_3/wsmp_encode.h"
+#include "../../include/1609_3/wave_llc.h"
+#include "../../include/fmt_error.h"
+#include "../../include/network.h"
 
 void free_iex(struct wsmp_iex *curs) {
      if (curs == NULL)
@@ -274,7 +279,7 @@ void _s(uint8_t *buf, size_t *i, const uint8_t v, size_t len, int *err) {
      if (*err) {
 	  return;
      } if (*i >= len) {
-	  *err = -WSMP_EFAULT;
+	  *err = WSMP_EPBUF;
 	  return;
      }
 
@@ -368,4 +373,26 @@ struct wsmp_wsm *create_wsmp_metadata(uint8_t subtype, uint8_t tpid, uint8_t inf
      wsm->len = len;
      wsm->data = data;
      return wsm;
+}
+
+wave_pdu * wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, 
+     uint8_t info_elem_indicator, uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid){
+     uint8_t subtype = 0, tpid=0; // currently only need to support for TPID=0
+     wave_pdu *pdu = create_pdu_buf();
+     struct wsmp_wsm *wsm_metadata = create_wsmp_metadata(subtype, tpid, info_elem_indicator, chan_id, data_rate, tx_power, psid, len, data);
+     int err_code = 0;
+     int *err = &err_code;
+     // WSMP Header + WSM data <= WSM Max Length : this check is done within the wsm_encoding
+     wsmp_wsm_encode(wsm_metadata, pdu, err, WSMP_STRICT);
+     if(*err) {
+          fmt_error(WAVE_WARN, "failed to encode wsm with err code");
+          return NULL;
+     }
+     // WSM data to the LLC sublayer
+     char *device = get_network_device();
+     uint8_t *src_macaddr = get_mac_addr(device);
+     uint8_t tx_pow_level = 14; // TODO: need to map to correct value (tx_power --> tx_pow_level)
+     dl_unitdatax_req(pdu, src_macaddr, peer_mac_addr, prority, chan_id, timeslot, data_rate, tx_pow_level, channel_load, wsm_expire_time);
+     free_wsm(wsm_metadata);
+     return pdu;
 }

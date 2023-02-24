@@ -29,6 +29,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "../../include/pdu_buf.h"
+#include "../../include/1609_3/wsmp.h"
+#include "../../include/1609_3/wave_llc.h"
+
 #define WSMP_EID_TX_POWER_USED_80211   4
 #define WSMP_EID_2DLOCATION            5
 #define WSMP_EID_3DLOCATION            6
@@ -49,7 +53,7 @@
 #define WSMP_EID_WSA_COUNT_THRES_INT  22
 #define WSMP_EID_CHANNEL_LOAD         23
 
-#define WSMP_MAXSIZE 2302
+#define WSMP_MAXSIZE 2304
 
 #define WSMP_WSM_MIN 3
 #define WSMP_WSA_MIN 2
@@ -98,6 +102,7 @@
 #define WSMP_EFAULT     EFAULT
 #define WSMP_EMODE      EPROTOTYPE
 #define WSMP_EDUPLICATE EMLINK
+#define WSMP_EPBUF 201 /* WSM data is too big */
 
 #define WSMP_WSM 0
 #define WSMP_WSA 1
@@ -277,6 +282,8 @@ void _s_c(uint8_t *buf, size_t *i, const uint16_t v, size_t len, int *err);
 struct wsmp_wsm *create_wsmp_metadata(uint8_t subtype, uint8_t tpid, uint8_t info_elem_indicator, uint8_t chan_id, uint8_t data_rate, 
      int8_t tx_pow, uint32_t psid, uint16_t len, uint8_t *data);
 struct wsmp_iex *create_n_iex(uint8_t chan_id, uint8_t data_rate, int8_t tx_pow);
+wave_pdu * wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, 
+     uint8_t info_elem_indicator, uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid);
 
 /* int wsmp_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg); */
 /* int wsmp_send(struct sk_buff *skb, int loop); */
