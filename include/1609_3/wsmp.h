@@ -145,7 +145,7 @@ struct wsmp_iex {
      uint8_t chan;      /* 0 to 200 */
      uint8_t data_rate; /* 2 to 127 */
      int8_t tx_pow;     /* -128 to 127 */
-     uint8_t channel_load;
+     // uint8_t channel_load;
 
      /* SII Elements */
      struct wsmp_ie_psc psc;
@@ -172,7 +172,6 @@ struct wsmp_iex {
 
      bool use[WSMP_EID_CHANNEL_LOAD+1];
 
-     /* Raw elements not defined in 1609.3-2016 */
      uint16_t raw_count;
      struct wsmp_ie_raw *raw;
 };
@@ -276,7 +275,8 @@ void _s_p(uint8_t *buf, size_t *i, const uint32_t v, size_t len, int *err);
 void _s_c(uint8_t *buf, size_t *i, const uint16_t v, size_t len, int *err);
 
 struct wsmp_wsm *create_wsmp_metadata(uint8_t subtype, uint8_t tpid, uint8_t info_elem_indicator, uint8_t chan_id, uint8_t data_rate, 
-     int8_t tx_pow, uint8_t channel_load, uint32_t psid, uint16_t len, uint8_t *data);
+     int8_t tx_pow, uint32_t psid, uint16_t len, uint8_t *data);
+struct wsmp_iex *create_n_iex(uint8_t chan_id, uint8_t data_rate, int8_t tx_pow);
 
 /* int wsmp_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg); */
 /* int wsmp_send(struct sk_buff *skb, int loop); */

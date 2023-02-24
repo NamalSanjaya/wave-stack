@@ -548,12 +548,11 @@ out:
      return ret;
 }
 
-void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, size_t *cnt, int *err, int mode) {
+void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, int *err, int mode) {
      uint8_t buf[WSMP_MAXSIZE];
      size_t i[1];
 
      *i = 0;
-     *cnt = 0;
      *err = 0;
 
      if (mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE) {
@@ -561,7 +560,6 @@ void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, size_t *cnt, in
 	  *err = -WSMP_EMODE;
 	  goto out;
      }
-
      if (mode != WSMP_LOOSE && curs->subtype > 4) {
 	  fprintf(stderr, "ERROR: mode != WSMP_LOOSE && curs->subtype > 4\n");
 	  *err = -WSMP_EDOMAIN;
@@ -623,11 +621,6 @@ void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, size_t *cnt, in
      _s_n(buf, i, curs->len, curs->data, WSMP_MAXSIZE, err);
 
 out:
-	if (*i > pdu->head - pdu->current){
-		*err = -EBADMSG;
-		return ;
-	}
-    memcpy(pdu->current + *i, buf, *i);
-    *cnt = *i;
+	add_data_to_pbuf(pdu, buf, *i);
     return ;
 }

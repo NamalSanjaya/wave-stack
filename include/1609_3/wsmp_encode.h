@@ -30,6 +30,6 @@ uint8_t *wsmp_sii_encode(const struct wsmp_sii *curs, size_t *cnt, int *err, int
 uint8_t *wsmp_cii_encode(const struct wsmp_cii *curs, size_t *cnt, int *err, int mode);
 uint8_t *wsmp_wra_encode(const struct wsmp_wra *curs, size_t *cnt, int *err, int mode);
 uint8_t *wsmp_wsa_encode(const struct wsmp_wsa *curs, size_t *cnt, int *err, int mode);
-void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, size_t *cnt, int *err, int mode);
+void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, int *err, int mode);
 
 #endif /* _WSMP_ENCODE_H */

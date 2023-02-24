@@ -321,22 +321,29 @@ void _s_c(uint8_t *buf, size_t *i, const uint16_t v, size_t len, int *err) {
      }
 }
 
-struct wsmp_iex *create_n_iex(uint8_t chan_id, uint8_t data_rate, int8_t tx_pow, uint8_t channel_load){
+struct wsmp_iex *create_n_iex(uint8_t chan_id, uint8_t data_rate, int8_t tx_pow){
      struct wsmp_iex *iex = calloc(1, sizeof(struct wsmp_iex));
-     iex->chan = chan_id;
-     iex->data_rate = data_rate;
-     iex->tx_pow = tx_pow;
-     iex->channel_load = channel_load;
-     if (chan_id != 0) iex->count++;
-     if (data_rate != 0) iex->count++;
-     if (tx_pow != 0) iex->count++;
-     if (channel_load != 0) iex->count++;
+     if(chan_id != 0){
+          iex->chan = chan_id;
+          iex->count++;
+          iex->use[WSMP_EID_CHANNEL_NUMBER_80211] = 1;
+     };
+     if(data_rate != 0){
+          iex->data_rate = data_rate;
+          iex->count++;
+          iex->use[WSMP_EID_DATA_RATE_80211] = 1;
+     };
+     if(tx_pow != 0){
+          iex->tx_pow = tx_pow;
+          iex->count++;
+          iex->use[WSMP_EID_TX_POWER_USED_80211] = 1;
+     };
      return iex;
 };
 
 // TODO: log errors, warns etc, how to return error.
 struct wsmp_wsm *create_wsmp_metadata(uint8_t subtype, uint8_t tpid, uint8_t info_elem_indicator, uint8_t chan_id, uint8_t data_rate, 
-     int8_t tx_pow, uint8_t channel_load, uint32_t psid, uint16_t len, uint8_t *data){
+     int8_t tx_pow, uint32_t psid, uint16_t len, uint8_t *data){
      struct wsmp_wsm *wsm = calloc(1, sizeof(struct wsmp_wsm));
 
      wsm->subtype = subtype;
@@ -346,7 +353,7 @@ struct wsmp_wsm *create_wsmp_metadata(uint8_t subtype, uint8_t tpid, uint8_t inf
      // N-header option indicator can be 0,1. We always set to one.
      if (info_elem_indicator == 1){
           wsm->use_n_iex = 1;
-          wsm->n_iex = create_n_iex(chan_id, data_rate, tx_pow, channel_load);
+          wsm->n_iex = create_n_iex(chan_id, data_rate, tx_pow);
      } else{
           wsm->use_n_iex = 0;
      }
