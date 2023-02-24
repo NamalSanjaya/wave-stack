@@ -14,15 +14,13 @@
 #define WAVE_LLC_ETHERTYPE_IP 0x86DD
 #define WAVE_LLC_ETHERTYPE_WAVE 0x88DC
 
-/* This will be used to create LLC PDU(MSDU) which is inserted into data field of MA-UNITDATAX.request' */
+/* This will be used to create LLC PDU(MSDU) which is inserted into data field of MA-UNITDATAX.request */
 typedef struct llc_pdu_metadata {
     uint8_t dsap;
     uint8_t ssap;
     uint8_t control;
     uint8_t oui[3];
     uint16_t ethertype;
-    uint16_t len;
-    uint8_t *data;
 } llc_pdu_metadata;
 
 /* Time Slot */
@@ -30,11 +28,11 @@ enum time_slot {
     time_slot0, time_slot1
 };
 
-llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype, uint8_t *data, uint16_t count);
+llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype);
 void print_llc_pdu_metadata(const llc_pdu_metadata *self);
 void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err);
 void free_llc_pdu_metadata(llc_pdu_metadata *self);
-void dl_unitdatax_req(wave_pdu *pdu, char *src_addr, char *dest_addr, uint8_t prority, uint8_t chan_id, 
-    enum time_slot timeslot, uint8_t data_rate, uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time, uint8_t *data, uint16_t count);
+void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint8_t prority, uint8_t chan_id, 
+    enum time_slot timeslot, uint8_t data_rate, uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time);
 
 #endif  /* _WAVE_LLC_H */
