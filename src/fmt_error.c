@@ -6,6 +6,7 @@
 
 extern int errno;
 
+// TODO: How to carry addtional data like err_code etc.
 void fmt_error(char *level, char *reason) {
     fprintf(stderr, "%s : %s, %s\n", level, reason, strerror(errno));
 }

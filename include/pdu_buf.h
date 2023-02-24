@@ -13,7 +13,7 @@ typedef struct wave_pdu {
 } wave_pdu;
 
 wave_pdu *create_pdu_buf();
-void add_data_to_pbuf(wave_pdu *pdu, uint8_t *data, size_t szof_data);
+void add_data_to_pbuf(wave_pdu *pdu, uint8_t *data, size_t szof_data, int *err);
 void show_pdu(wave_pdu *self);
 void free_pbuf(wave_pdu *pdu);
 

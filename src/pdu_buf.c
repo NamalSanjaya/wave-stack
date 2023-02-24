@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/pdu_buf.h"
-#include "../include/wave.h"
 #include "../include/fmt_error.h"
+#include "../include/1609_3/wsmp.h"
 
 void show_pdu(wave_pdu *self){
     printf("head: %p\n", self->head);
@@ -18,14 +18,14 @@ void show_pdu(wave_pdu *self){
  * pdu.offset - offset from pdu.current to pdu.end in octets.
  */
 wave_pdu *create_pdu_buf(){
-    uint8_t *pdu_buf =  calloc(MSDU_MAXSIZE, 1);
+    uint8_t *pdu_buf =  calloc(WSMP_MAXSIZE, 1);
     if (pdu_buf == NULL) fmt_error(WAVE_ERROR, "could not allocate memory to create pdu-buf");
 
     wave_pdu* pdu = malloc(sizeof(wave_pdu));
     if (pdu == NULL) fmt_error(WAVE_ERROR, "could not allocate memory to create wave pdu");
 
     pdu->head = pdu_buf;
-    pdu->end = pdu_buf + (size_t)MSDU_MAXSIZE;
+    pdu->end = pdu_buf + (size_t)WSMP_MAXSIZE;
     pdu->current = pdu->end;
     pdu->offset = 0;
     return pdu;
@@ -35,11 +35,12 @@ wave_pdu *create_pdu_buf(){
  * add data with given size to pdu_buf from left to right. only support 
  * uint8_t data pointers. if pdu_buf size is not enough operation will cancel.(pdu_buf size won't increase automatically)
  */
-void add_data_to_pbuf(wave_pdu *pdu, uint8_t *data, size_t szof_data){
+void add_data_to_pbuf(wave_pdu *pdu, uint8_t *data, size_t szof_data, int *err){
     uint8_t *st = pdu->current - szof_data;
     if (st < pdu->head){
-        /* pdu_buf size is not enough */
-        fmt_error(WAVE_WARN, "pdu_buf size is exceeded");
+        // pdu_buf size is not enough
+        *err=WSMP_EPBUF;
+        fmt_error(WAVE_WARN, "pdu_buf size is exceeded for a WSM data");
         return;
     }
     memcpy(st, data, szof_data);
