@@ -9,7 +9,7 @@
 
 llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype){
     llc_pdu_metadata *ptr = malloc(sizeof(llc_pdu_metadata));
-    if(ptr == NULL) fmt_panic("unable to allocate memory to create LLC PDU metadata\n");
+    if(ptr == NULL) fmt_error(WAVE_ERROR,"unable to allocate memory to create LLC PDU metadata");
     ptr->dsap = 0xAB;
     ptr->ssap = 0xAB;
     ptr->control = 0x03;
@@ -39,11 +39,11 @@ void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err){
     *err = 0;
 
     if(WAVE_LLC_OUI != ((self->oui[0] << 16)| (self->oui[1] << 8)| self->oui[2])) {
-        fmt_error(WAVE_WARN, "unsupported OUI field given to encode LLC PDU.\n");
+        fmt_error(WAVE_WARN, "unsupported OUI field given to encode LLC PDU.");
         return;
     }
     if(self->ethertype != WAVE_LLC_ETHERTYPE_IP && self->ethertype != WAVE_LLC_ETHERTYPE_WAVE){
-        fmt_error(WAVE_WARN, "unsupported Ethertype field given to encode LLC PDU.\n");
+        fmt_error(WAVE_WARN, "unsupported Ethertype field given to encode LLC PDU.");
         return;
     }
     // don't need to get data seperate as we use the pdu_buf to track the memory locations
