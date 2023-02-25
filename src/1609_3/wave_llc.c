@@ -9,7 +9,10 @@
 
 llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype){
     llc_pdu_metadata *ptr = malloc(sizeof(llc_pdu_metadata));
-    if(ptr == NULL) fmt_error(WAVE_ERROR,"unable to allocate memory to create LLC PDU metadata");
+    if(ptr == NULL) { 
+        fmt_error(WAVE_ERROR,"unable to allocate memory to create LLC PDU metadata");
+        return NULL;
+    }
     ptr->dsap = 0xAB;
     ptr->ssap = 0xAB;
     ptr->control = 0x03;
@@ -66,8 +69,15 @@ void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint
     int err_code=0;
     int *err=&err_code;
     llc_pdu_metadata *llc_metadata = init_llc_pdu_metadata(ethertype);
-    llc_encode(llc_metadata, pdu, err);
+    if (llc_metadata == NULL){
+        fmt_error(WAVE_WARN, "unable to send wsmp_wsm to MAC layer since failed to create LLC metadata");
+        return
+    }
     
+    llc_encode(llc_metadata, pdu, err);
+    if(*err){
+        fmt_error(WAVE_WARN, "unable to send wsmp_wsm to MAC layer since failed to encode LLC frame")
+    }
     /* TODO: need to send pdu with relavent parameter to multi channel operational layer running in kernel space */
     free_llc_pdu_metadata(llc_metadata); // put very end
 }
