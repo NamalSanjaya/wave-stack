@@ -33,6 +33,6 @@ void print_llc_pdu_metadata(const llc_pdu_metadata *self);
 void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err);
 void free_llc_pdu_metadata(llc_pdu_metadata *self);
 void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint8_t prority, uint8_t chan_id, 
-    enum time_slot timeslot, uint8_t data_rate, uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time);
+    enum time_slot timeslot, uint8_t data_rate, uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time, int *err);
 
 #endif  /* _WAVE_LLC_H */

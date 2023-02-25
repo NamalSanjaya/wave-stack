@@ -102,6 +102,7 @@
 #define WSMP_EFAULT     EFAULT
 #define WSMP_EMODE      EPROTOTYPE
 #define WSMP_EDUPLICATE EMLINK
+#define WSMP_ENOMEM ENOMEM
 #define WSMP_EPBUF 201 /* WSM data is too big */
 
 #define WSMP_WSM 0
@@ -253,6 +254,11 @@ struct wsmp_wsa {
 
      bool use_wra;
      struct wsmp_wra *wra;
+};
+
+// valid ranges for confirm the acceptance of a WSM.
+enum confirm_result_code {
+    accepted, rejected_max_length, exceeded, rejected_unspecified
 };
 
 void free_iex(struct wsmp_iex *curs);

@@ -19,8 +19,9 @@
 //     uint8_t txpwr_level = 5;
 //     uint8_t chan_load = 1;
 //     uint64_t wsm_exptime = 1000;
-
-//     dl_unitdatax_req(pdu, src_macaddr, des_macaddr, prority, chan_id, tmslot, data_rate, txpwr_level, chan_load, wsm_exptime);
+//     int err_code = 0;
+//     int *err = &err_code;
+//     dl_unitdatax_req(pdu, src_macaddr, des_macaddr, prority, chan_id, tmslot, data_rate, txpwr_level, chan_load, wsm_exptime, err);
 //     size_t llc_size = 8;
 //     print_binx(pdu->current, llc_size);
 //     // for (size_t i = 0; i < pdu->offset; i++){

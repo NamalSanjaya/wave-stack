@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../include/1609_3/wave_llc.h"
+#include "../../include/1609_3/wsmp.h"
 #include "../../include/wave_encode.h"
 #include "../../include/pdu_buf.h"
 #include "../../include/fmt_error.h"
@@ -42,10 +43,12 @@ void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err){
     *err = 0;
 
     if(WAVE_LLC_OUI != ((self->oui[0] << 16)| (self->oui[1] << 8)| self->oui[2])) {
+        *err=WSMP_ENOSUPPORT;
         fmt_error(WAVE_WARN, "unsupported OUI field given to encode LLC PDU.");
         return;
     }
     if(self->ethertype != WAVE_LLC_ETHERTYPE_IP && self->ethertype != WAVE_LLC_ETHERTYPE_WAVE){
+        *err=WSMP_ENOSUPPORT;
         fmt_error(WAVE_WARN, "unsupported Ethertype field given to encode LLC PDU.");
         return;
     }
@@ -62,21 +65,21 @@ void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err){
 /* TODO: Power is signed integer. check it again */
 /* Issued by WSMP layer to request that LSDU to be sent to Multi-Channel operation layer */
 void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint8_t prority, uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate,
-    uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time){
+    uint8_t txpwr_level, uint8_t channel_load, uint64_t wsm_expire_time, int *err){
     /* most of parameters coming from WSMP layer. They have checked once. Only new parameters are src_addr, txpwr_level. */
     /* src_addr, dest_addr, prority, channel_Id etc won't use to encode at LLC. But there will be pass to MAC layer functions */
+    *err = 0;
     uint16_t ethertype = 0x88DC; /* default to WSMP */
-    int err_code=0;
-    int *err=&err_code;
     llc_pdu_metadata *llc_metadata = init_llc_pdu_metadata(ethertype);
     if (llc_metadata == NULL){
         fmt_error(WAVE_WARN, "unable to send wsmp_wsm to MAC layer since failed to create LLC metadata");
-        return
-    }
-    
+        *err=WSMP_ENOMEM;
+        return;
+    }    
     llc_encode(llc_metadata, pdu, err);
     if(*err){
-        fmt_error(WAVE_WARN, "unable to send wsmp_wsm to MAC layer since failed to encode LLC frame")
+        fmt_error(WAVE_WARN, "unable to send wsmp_wsm to MAC layer since failed to encode LLC frame");
+        // return;
     }
     /* TODO: need to send pdu with relavent parameter to multi channel operational layer running in kernel space */
     free_llc_pdu_metadata(llc_metadata); // put very end

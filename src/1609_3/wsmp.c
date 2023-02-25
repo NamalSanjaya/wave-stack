@@ -392,7 +392,7 @@ wave_pdu * wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_
      char *device = get_network_device();
      uint8_t *src_macaddr = get_mac_addr(device);
      uint8_t tx_pow_level = 14; // TODO: need to map to correct value (tx_power --> tx_pow_level)
-     dl_unitdatax_req(pdu, src_macaddr, peer_mac_addr, prority, chan_id, timeslot, data_rate, tx_pow_level, channel_load, wsm_expire_time);
+     dl_unitdatax_req(pdu, src_macaddr, peer_mac_addr, prority, chan_id, timeslot, data_rate, tx_pow_level, channel_load, wsm_expire_time, err);
      free_wsm(wsm_metadata);
      return pdu;
 }
