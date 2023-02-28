@@ -82,5 +82,8 @@ void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint
         // return;
     }
     /* TODO: need to send pdu with relavent parameter to multi channel operational layer running in kernel space */
+    // To verify wsm whole flow is working, we are configuring 1609.4 as userspace process which only use signal channal(no channel switching).
+    // This is only for the testing purpose.
+    // ma_unitdatax_req()
     free_llc_pdu_metadata(llc_metadata); // put very end
 }
