@@ -83,6 +83,15 @@
 // }
 
 // test for wsm_waveshortmsg request
+
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <net/ethernet.h>
+#include <string.h>
+#include <linux/if_packet.h>
+#include <stdio.h>
+#include <unistd.h>
+
 #include "../../include/1609_3/wsmp.h"
 #include "../../include/pdu_buf.h"
 #include "../../include/1609_3/wave_llc.h"
@@ -108,7 +117,23 @@ int main(){
         fprintf(stderr, "failed to generate WSM data\n");
         exit(1);
     }
-    print_binx(rpdu->current, rpdu->offset);
-    show_pdu(rpdu);
+
+    // writing to tap interface
+    int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ALL));
+    int ifindex = 12;  // tap interface index
+
+    struct sockaddr_ll SendSockAddr;
+    SendSockAddr.sll_family   = AF_PACKET;
+    SendSockAddr.sll_halen    = ETH_ALEN;
+    SendSockAddr.sll_ifindex  = ifindex;
+    SendSockAddr.sll_protocol = htons(ETH_P_ALL);
+    SendSockAddr.sll_hatype   = 0;
+    SendSockAddr.sll_pkttype  = 0;
+
+    for (size_t i = 0; i < 5; i++){
+        ssize_t total =  sendto(sockfd, rpdu->current, rpdu->offset, 0, (struct sockaddr *) &SendSockAddr, sizeof(struct sockaddr_ll));
+        printf("sent : %ld\n", total);
+    }
+    close(sockfd);
     free_pbuf(rpdu);
 }
