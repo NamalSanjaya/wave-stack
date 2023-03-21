@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <linux/if_tun.h>
 #include "../include/network.h"
 #include "../include/fmt_error.h"
 
@@ -45,4 +46,30 @@ uint8_t *get_mac_addr(char *device){
 char *get_network_device() {
     char error_buffer[PCAP_ERRBUF_SIZE];
     return pcap_lookupdev(error_buffer);
+}
+
+int alloc_tun(char *dev) {
+    struct ifreq ifr;
+    int fd, err;
+
+    /* open the /dev/net/tun device */
+    if ((fd = open("/dev/net/tun", O_RDWR)) < 0) {
+        perror("open");
+        return -1;
+    }
+
+    /* configure the device */
+    memset(&ifr, 0, sizeof(ifr));
+    ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
+    strncpy(ifr.ifr_name, dev, IFNAMSIZ);
+
+    /* create the device */
+    if ((err = ioctl(fd, TUNSETIFF, (void *)&ifr)) < 0) {
+        perror("ioctl");
+        close(fd);
+        return err;
+    }
+
+    /* return the file descriptor */
+    return fd;
 }

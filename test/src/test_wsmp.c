@@ -197,4 +197,3 @@ wave_pdu *gen_wsm_waveshortmsg_req(){
      memcpy(data, msg, len);
      return wsm_waveshortmsg_req(chan_id, tmslot, data_rate, tx_power, chan_load, info_element_indicator, prority, wsm_exptime, len, data, peer_macaddr, psid);
 }
-
