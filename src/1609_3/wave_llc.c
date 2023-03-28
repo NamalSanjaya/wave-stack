@@ -41,7 +41,6 @@ void free_llc_pdu_metadata(llc_pdu_metadata *self){
 
 void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err){
     *err = 0;
-
     if(WAVE_LLC_OUI != ((self->oui[0] << 16)| (self->oui[1] << 8)| self->oui[2])) {
         *err=WSMP_ENOSUPPORT;
         fmt_error(WAVE_WARN, "unsupported OUI field given to encode LLC PDU.");
@@ -61,6 +60,31 @@ void llc_encode(const llc_pdu_metadata *self, wave_pdu *pdu, int *err){
     store_uint8(pdu, WAVE_LLC_DSAP, err);      /* DSAP field */
 }
 
+llc_pdu_metadata *llc_decode(wave_pdu *pdu, int *err){
+    llc_pdu_metadata *llc_metadata = init_llc_pdu_metadata(WAVE_LLC_ETHERTYPE_WAVE);
+    if(llc_metadata == NULL) {
+        //TODO: *err=?
+        return NULL;
+    }
+    *err = 0;
+    retrieve_uint8(pdu, &(llc_metadata->dsap), err);
+    retrieve_uint8(pdu, &(llc_metadata->ssap), err);
+    retrieve_uint8(pdu, &(llc_metadata->control), err);
+    retrieve_uint8_n(pdu, 3, llc_metadata->oui, err);
+    if(WAVE_LLC_OUI != ((llc_metadata->oui[0] << 16)| (llc_metadata->oui[1] << 8)| llc_metadata->oui[2])) {
+        *err=WSMP_ENOSUPPORT;
+        fmt_error(WAVE_WARN, "unsupported OUI field found during LLC PDU decoding.");
+        return NULL;
+    }
+    retrieve_uint16(pdu, &(llc_metadata->ethertype), err);
+    if(llc_metadata->ethertype != WAVE_LLC_ETHERTYPE_IP && llc_metadata->ethertype != WAVE_LLC_ETHERTYPE_WAVE){
+        *err=WSMP_ENOSUPPORT;
+        fmt_error(WAVE_WARN, "unsupported Ethertype field found during LLC PDU decoding.");
+        return NULL;
+    }
+    return llc_metadata;
+}
+
 /* TODO: Need to decide the return type. we can input an error pointer and can check its states */
 /* TODO: Power is signed integer. check it again */
 /* Issued by WSMP layer to request that LSDU to be sent to Multi-Channel operation layer */
@@ -69,7 +93,7 @@ void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint
     /* most of parameters coming from WSMP layer. They have checked once. Only new parameters are src_addr, txpwr_level. */
     /* src_addr, dest_addr, prority, channel_Id etc won't use to encode at LLC. But there will be pass to MAC layer functions */
     *err = 0;
-    uint16_t ethertype = 0x88DC; /* default to WSMP */
+    uint16_t ethertype = WAVE_LLC_ETHERTYPE_WAVE; /* default to WSMP */
     llc_pdu_metadata *llc_metadata = init_llc_pdu_metadata(ethertype);
     if (llc_metadata == NULL){
         fmt_error(WAVE_WARN, "unable to send wsmp_wsm to MAC layer since failed to create LLC metadata");
@@ -86,4 +110,34 @@ void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint
     // This is only for the testing purpose.
     // ma_unitdatax_req()
     free_llc_pdu_metadata(llc_metadata); // put very end
+}
+
+// send payload to WSMP layer.
+void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, int *err){
+    *err=0;
+    if(llc_metadata->ethertype == WAVE_LLC_ETHERTYPE_IP){
+        // current tcp/ip is not supported. log a warning msg
+        return;
+    }
+    // TODO: call WSMP layer function to handover the data.
+}
+
+// receive packets from multi-channel operational layer.
+void dl_recv(int *err){
+    /** TODO:
+     * 1. block listening to receive data.
+     * 2. decode and extract each field while validating and payload.
+     * 3. take necessary action if a field has corrupted or has wrong data.
+     * 4. call DL-UNITDATA.ind method to send payload to WSMP layer.
+    */
+    *err=0;
+    wave_pdu *pdu = create_pdu_buf();
+    // TODO: 1. block listening to receive data. update the pdu as necessary
+    // to represent a frame received from multi-channel operation layer.
+    llc_pdu_metadata *llc_metadata = llc_decode(pdu, err);
+    if(*err){
+        // log relvent error
+        return;
+    }
+    dl_unitdata_ind(llc_metadata, pdu, err);
 }

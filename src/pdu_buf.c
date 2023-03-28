@@ -48,6 +48,17 @@ void add_data_to_pbuf(wave_pdu *pdu, uint8_t *data, size_t szof_data, int *err){
     pdu->offset += szof_data;
 }
 
+void read_from_pbuf(wave_pdu *pdu, size_t szof_data, uint8_t *ret, int *err){
+    if(pdu->current > pdu->end){
+        // err = ?
+        // log relavent error
+        return;
+    }
+    memcpy(ret, pdu->current, szof_data);
+    pdu->current += szof_data;
+    pdu->offset -= szof_data;
+}
+
 void free_pbuf(wave_pdu *pdu){
     free(pdu->head);
     free(pdu);

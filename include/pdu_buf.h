@@ -16,5 +16,6 @@ wave_pdu *create_pdu_buf();
 void add_data_to_pbuf(wave_pdu *pdu, uint8_t *data, size_t szof_data, int *err);
 void show_pdu(wave_pdu *self);
 void free_pbuf(wave_pdu *pdu);
+void read_from_pbuf(wave_pdu *pdu, size_t szof_data, uint8_t *ret, int *err);
 
 #endif /* _PDU_BUF_H */
