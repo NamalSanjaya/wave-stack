@@ -1,4 +1,4 @@
-// ----------- test for 1st commit  ------------------
+// ----------- test LLC encode & decode ------------------
 
 // #include <stdlib.h>
 // #include <stdio.h>
@@ -10,8 +10,8 @@
 
 // int main(){
 //     wave_pdu *pdu = create_pdu_buf();
-//     char *src_macaddr = "88:66:aa:bb:dd:cc";
-//     char *des_macaddr = "11:66:aa:bb:dd:22";
+//     uint8_t *src_macaddr = "88:66:aa:bb:dd:cc";
+//     uint8_t *des_macaddr = "11:66:aa:bb:dd:22";
 //     uint8_t prority = 2;
 //     uint8_t chan_id = 172;
 //     enum time_slot tmslot = time_slot0;
@@ -23,12 +23,16 @@
 //     int *err = &err_code;
 //     dl_unitdatax_req(pdu, src_macaddr, des_macaddr, prority, chan_id, tmslot, data_rate, txpwr_level, chan_load, wsm_exptime, err);
 //     size_t llc_size = 8;
-//     print_binx(pdu->current, llc_size);
-//     // for (size_t i = 0; i < pdu->offset; i++){
-//     //     printf("%x, ", *(pdu->current + i) );
-//     // }
+//     // print_binx(pdu->current, llc_size);
 //     // show_pdu(pdu);
+
+//     // test LLC decoding logic
+//     uint16_t ethertype = 0x88DC; /* default to WSMP */
+//     llc_pdu_metadata *llc_metadata = init_llc_pdu_metadata(ethertype);
+//     llc_decode(llc_metadata, pdu, err);
+//     print_llc_pdu_metadata(llc_metadata);
 //     free_pbuf(pdu);
+//     free_llc_pdu_metadata(llc_metadata);
 //     printf("\n-- end --\n");
 //     return 0;
 // }
@@ -45,99 +49,98 @@
 // }
 // ------------------------- end ------------------------
 
-// #include <stdio.h>
-// #include <stdint.h>
-// #include <stdlib.h>
-// #include "../../include/1609_3/wsmp.h"
-// #include "../include/test_wsmp.h"
-// #include "../../include/1609_3/wsmp_encode.h"
-// #include "../../include/pdu_buf.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "../../include/1609_3/wsmp.h"
+#include "../include/test_wsmp.h"
+#include "../../include/1609_3/wsmp_encode.h"
+#include "../../include/pdu_buf.h"
+#include "../../include/1609_3/wsmp_decode.h"
 
-// int main(){
-//     uint8_t subtype = 0, opt_indicator = 1, tpid=0, chan_id=172, data_rate=0x0C;
-//     int8_t tx_power=0x9E;
-//     uint32_t psid = 0xC00305;
-//     uint16_t len = 11;
-//     uint8_t *data = calloc(1, sizeof(char));
-//     uint8_t msg[] = "hello-world";
-//     if (data==NULL){
-//         fprintf(stderr, "could not allocate memory");
-//         exit(1);
-//     }
-//     data = msg;
-//     struct wsmp_wsm *wsm_metadata = create_wsmp_metadata(subtype, tpid, opt_indicator, chan_id, data_rate, tx_power, psid, len, data);
-//     wave_pdu *pdu = create_pdu_buf();
-//     printf("\n--before encoding--\n");
-//     show_pdu(pdu);
-//     int gerr = 0;
-//     int *err = &gerr;
-//     wsmp_wsm_encode(wsm_metadata, pdu, err, WSMP_STRICT);
-//     if(*err) {
-//         fprintf(stderr, "went wrong in encoding %d", *err);
-//         exit(1);
-//     }
-//     printf("\n--after encoding--\n");
-//     show_pdu(pdu);
-//     free_pbuf(pdu);
-
-// }
+int main(){
+    uint8_t subtype = 0, opt_indicator = 1, tpid=0, chan_id=178, data_rate=0x0C;
+    int8_t tx_power=0x9E;
+    uint32_t psid = 0xC00305;
+    uint16_t len = 11;
+    uint8_t *data = calloc(1, sizeof(char));
+    uint8_t msg[] = "hello-world";
+    if (data==NULL){
+        fprintf(stderr, "could not allocate memory");
+        exit(1);
+    }
+    data = msg;
+    struct wsmp_wsm *wsm_metadata = create_wsmp_metadata(subtype, tpid, opt_indicator, chan_id, data_rate, tx_power, psid, len, data);
+    wave_pdu *pdu = create_pdu_buf();
+    int gerr = 0;
+    int *err = &gerr;
+    wsmp_wsm_encode(wsm_metadata, pdu, err, WSMP_STRICT);
+    if(*err) {
+        fprintf(stderr, "went wrong in encoding %d", *err);
+        exit(1);
+    }
+    struct wsmp_wsm *decoded_wsm = wsmp_wsm_decode(pdu, err, WSMP_STRICT);
+    print_wsm(decoded_wsm);
+    free_pbuf(pdu);
+    free(decoded_wsm);
+}
 
 // --------------- writing wsmp+llc data  to tun interface ---------- 
 // test for wsm_waveshortmsg request
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <net/ethernet.h>
-#include <string.h>
-#include <linux/if_packet.h>
-#include <stdio.h>
-#include <unistd.h>
+// #include <sys/socket.h>
+// #include <arpa/inet.h>
+// #include <net/ethernet.h>
+// #include <string.h>
+// #include <linux/if_packet.h>
+// #include <stdio.h>
+// #include <unistd.h>
 
-#include "../../include/1609_3/wsmp.h"
-#include "../../include/pdu_buf.h"
-#include "../../include/1609_3/wave_llc.h"
-#include "../include/test_wsmp.h"
+// #include "../../include/1609_3/wsmp.h"
+// #include "../../include/pdu_buf.h"
+// #include "../../include/1609_3/wave_llc.h"
+// #include "../include/test_wsmp.h"
 
-int main(){
-    uint8_t info_element_indicator=1, chan_id=172, data_rate=0x0C, chan_load=1, prority = 2;
-    int8_t tx_power=0x9E;
-    uint64_t wsm_exptime = 1000;
-    enum time_slot tmslot = time_slot0;
-    uint8_t *peer_macaddr = 0x1166aabbdd22;
-    uint32_t psid = 0xC00305;
-    uint16_t len = 11;
-    uint8_t *data = calloc(len, sizeof(char));
-    char *msg = "hello-world";
-    if (data==NULL){
-        fprintf(stderr, "could not allocate memory\n");
-        exit(1);
-    }
-    memcpy(data, msg, len);
-    wave_pdu *rpdu = wsm_waveshortmsg_req(chan_id, tmslot, data_rate, tx_power, chan_load, info_element_indicator, prority, wsm_exptime, len, data, peer_macaddr, psid);
-    if (rpdu==NULL){
-        fprintf(stderr, "failed to generate WSM data\n");
-        exit(1);
-    }
+// int main(){
+//     uint8_t info_element_indicator=1, chan_id=172, data_rate=0x0C, chan_load=1, prority = 2;
+//     int8_t tx_power=0x9E;
+//     uint64_t wsm_exptime = 1000;
+//     enum time_slot tmslot = time_slot0;
+//     uint8_t *peer_macaddr = 0x1166aabbdd22;
+//     uint32_t psid = 0xC00305;
+//     uint16_t len = 11;
+//     uint8_t *data = calloc(len, sizeof(char));
+//     char *msg = "hello-world";
+//     if (data==NULL){
+//         fprintf(stderr, "could not allocate memory\n");
+//         exit(1);
+//     }
+//     memcpy(data, msg, len);
+//     wave_pdu *rpdu = wsm_waveshortmsg_req(chan_id, tmslot, data_rate, tx_power, chan_load, info_element_indicator, prority, wsm_exptime, len, data, peer_macaddr, psid);
+//     if (rpdu==NULL){
+//         fprintf(stderr, "failed to generate WSM data\n");
+//         exit(1);
+//     }
 
-    // writing to tap interface
-    int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ALL));
-    int ifindex = 4;  // tun interface index
+//     // writing to tap interface
+//     int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ALL));
+//     int ifindex = 4;  // tun interface index
 
-    struct sockaddr_ll SendSockAddr;
-    SendSockAddr.sll_family   = AF_PACKET;
-    SendSockAddr.sll_halen    = ETH_ALEN;
-    SendSockAddr.sll_ifindex  = ifindex;
-    SendSockAddr.sll_protocol = htons(ETH_P_ALL);
-    SendSockAddr.sll_hatype   = 0;
-    SendSockAddr.sll_pkttype  = 0;
+//     struct sockaddr_ll SendSockAddr;
+//     SendSockAddr.sll_family   = AF_PACKET;
+//     SendSockAddr.sll_halen    = ETH_ALEN;
+//     SendSockAddr.sll_ifindex  = ifindex;
+//     SendSockAddr.sll_protocol = htons(ETH_P_ALL);
+//     SendSockAddr.sll_hatype   = 0;
+//     SendSockAddr.sll_pkttype  = 0;
 
-    for (size_t i = 0; i < 1; i++){
-        ssize_t total =  sendto(sockfd, rpdu->current, rpdu->offset, 0, (struct sockaddr *) &SendSockAddr, sizeof(struct sockaddr_ll));
-        printf("sent : %ld\n", total);
-    }
-    close(sockfd);
-    free_pbuf(rpdu);
-}
+//     for (size_t i = 0; i < 1; i++){
+//         ssize_t total =  sendto(sockfd, rpdu->current, rpdu->offset, 0, (struct sockaddr *) &SendSockAddr, sizeof(struct sockaddr_ll));
+//         printf("sent : %ld\n", total);
+//     }
+//     close(sockfd);
+//     free_pbuf(rpdu);
+// }
 
 // ------------------------ end --------------------------
 
