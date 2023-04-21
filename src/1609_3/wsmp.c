@@ -328,12 +328,12 @@ void _s_c(uint8_t *buf, size_t *i, const uint16_t v, size_t len, int *err) {
 
 struct wsmp_iex *create_n_iex(uint8_t chan_id, uint8_t data_rate, int8_t tx_pow){
      struct wsmp_iex *iex = calloc(1, sizeof(struct wsmp_iex));
-     if(chan_id != 0){
+     if(chan_id >= 0){
           iex->chan = chan_id;
           iex->count++;
           iex->use[WSMP_EID_CHANNEL_NUMBER_80211] = 1;
      };
-     if(data_rate != 0){
+     if(data_rate > 1){
           iex->data_rate = data_rate;
           iex->count++;
           iex->use[WSMP_EID_DATA_RATE_80211] = 1;

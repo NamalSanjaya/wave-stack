@@ -52,24 +52,22 @@ int alloc_tun(char *dev) {
     struct ifreq ifr;
     int fd, err;
 
-    /* open the /dev/net/tun device */
+    // open the /dev/net/tun device
     if ((fd = open("/dev/net/tun", O_RDWR)) < 0) {
         perror("open");
         return -1;
     }
 
-    /* configure the device */
+    // configure the device 
     memset(&ifr, 0, sizeof(ifr));
     ifr.ifr_flags = IFF_TUN | IFF_NO_PI;
     strncpy(ifr.ifr_name, dev, IFNAMSIZ);
 
-    /* create the device */
+    // create the device 
     if ((err = ioctl(fd, TUNSETIFF, (void *)&ifr)) < 0) {
         perror("ioctl");
         close(fd);
         return err;
     }
-
-    /* return the file descriptor */
     return fd;
 }

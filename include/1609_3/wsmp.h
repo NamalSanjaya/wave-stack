@@ -145,7 +145,7 @@ struct wsmp_ie_advert_id {
 };
 
 struct wsmp_iex {
-     uint16_t count; /* 1 to 255 */
+     uint16_t count; /* TODO: 0-127 : 8 bits, 128-255 : 16 bits */ 
 
      /* WSM Elements */
      uint8_t chan;      /* 0 to 200 */
@@ -167,7 +167,7 @@ struct wsmp_iex {
      uint8_t chan_access; /* 0 to 2 */
 
      /* WSA Elements */
-     uint8_t repeat_rate;
+     uint8_t repeat_rate;  // 0-255
      struct wsmp_ie_2d loc_2d;
      struct wsmp_ie_3d loc_3d;
      struct wsmp_ie_advert_id advert_id;
@@ -240,7 +240,7 @@ struct wsmp_wra {
 
 struct wsmp_wsa {
      uint8_t version;       /* 0 to 15 */
-     uint8_t id;            /* 0 to 15 */
+     uint8_t id;            /* WSA Identifier, 0 to 15 */
      uint8_t content_count; /* 0 to 15 */
 
      bool use_iex;
