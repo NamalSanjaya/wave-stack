@@ -9,7 +9,15 @@ enum action {
 };
 
 enum wsa_type {
-    unsecured, secured
+    secured = 1, unsecured = 2
+};
+
+enum channel_access {
+    continuous = 0, alternatingTimeslot1Only = 1, alternatingTimeslot0Only = 2
+};
+
+enum service_status{
+    pending = 0, satisfied = 1, partiallySatisfied = 2
 };
 
 struct wsmp_iex *create_wsa_iex(uint8_t repeat_rate, bool use_loc2d,  uint32_t loc2d_latitude, uint32_t loc2d_longitude, bool use_loc3d,
