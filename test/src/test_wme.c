@@ -9,6 +9,7 @@
 int main(){
     ProviderServiceRequestTable *db = create_provider_tb();
 
+    // data set 1
     enum wsa_type  wsatype = unsecured;
     uint32_t psid = 0xC00305;
     uint8_t psc[32] = "weather information nice";
@@ -19,18 +20,44 @@ int main(){
     uint8_t  wsa_chan_no = 174;
     uint8_t  repeat_rate = 10; 
     bool ip_service = false; 
-    uint8_t ipv6_address[15] = "255.255.101.129"; 
+    uint8_t ipv6_address[15] = ""; 
     uint8_t provider_mac_addr[11] = "ff:ff:ff:ff" ;   
-    uint32_t service_port = 8080; 
+    uint32_t service_port = 0; 
     uint8_t  rcpi_threshold = 120;
     uint8_t  wsa_count_threshold = 23; 
     uint8_t  wsa_count_threshold_intrv = 5; 
     enum service_status  serv_status = satisfied;
 
+    // data set 2
+    enum wsa_type  wsatype2 = secured;
+    uint32_t psid2 = 0xC00307;
+    uint8_t psc2[32] = "traffic information within 1km";
+    enum channel_access  chan_access2 = alternatingTimeslot0Only;
+    bool best_available2 = false;
+    uint32_t op_class2 = 16;
+    uint8_t  ps_chan_no2 = 172;
+    uint8_t  wsa_chan_no2 = 188;
+    uint8_t  repeat_rate2 = 14; 
+    bool ip_service2 = true; 
+    uint8_t ipv6_address2[15] = "192.188.101.129"; 
+    uint8_t provider_mac_addr2[11] = "3f:12:af:bc" ;   
+    uint32_t service_port2 = 8000; 
+    uint8_t  rcpi_threshold2 = 178;
+    uint8_t  wsa_count_threshold2 = 54; 
+    uint8_t  wsa_count_threshold_intrv2 = 12; 
+    enum service_status  serv_status2 = partiallySatisfied;
+
     wme_prvtb_add(wsatype, psid, psc, chan_access, best_available, op_class, ps_chan_no, wsa_chan_no, repeat_rate, ip_service, ipv6_address, provider_mac_addr,
     service_port, rcpi_threshold, wsa_count_threshold, wsa_count_threshold_intrv, serv_status, db);
 
+    wme_prvtb_add(wsatype2, psid2, psc2, chan_access2, best_available2, op_class2, ps_chan_no2, wsa_chan_no2, repeat_rate2, ip_service2, ipv6_address2, provider_mac_addr2,
+    service_port2, rcpi_threshold2, wsa_count_threshold2, wsa_count_threshold_intrv2, serv_status2, db);
+
     ProviderServiceRequestTableEntry *entry = wme_prvtb_get_by_psid(psid, db);
+    ProviderServiceRequestTableEntry *entry2 = wme_prvtb_get_by_psid(psid2, db);
     show_tb_entry(*entry);
+    printf("\n--------------------------------------------------------\n");
+    show_tb_entry(*entry2);
     free(entry);
+    free(entry2);
 }
