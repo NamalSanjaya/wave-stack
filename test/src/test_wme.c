@@ -6,7 +6,10 @@
 #include "../../include/1609_3/wme.h"
 #include "../../include/1609_3/ieee1609dot3_mib.h"
 
-int main(){
+void exec_test_provider_tb();
+
+void exec_test_provider_tb(){
+    printf("\n----- Provider Service Request Table Info -----\n");
     ProviderServiceRequestTable *db = create_wme_provider_tb();
 
     // data set 1
@@ -59,4 +62,8 @@ int main(){
     printf("\n--------------------------------------------------------\n");
     show_wme_prvtb_entry(*entry2);
     free(db);
+}
+
+int main(){
+    exec_test_provider_tb();
 }
