@@ -7,6 +7,7 @@
 #include "../../include/1609_3/ieee1609dot3_mib.h"
 
 void exec_test_provider_tb();
+void exex_test_channelInfo_tb();
 
 void exec_test_provider_tb(){
     printf("\n----- Provider Service Request Table Info -----\n");
@@ -64,6 +65,68 @@ void exec_test_provider_tb(){
     free(db);
 }
 
+void exex_test_channelInfo_tb(){
+    // data set-1
+    uint8_t op_class = 12;
+    uint8_t chan_no = 172;
+    bool is_adaptable = true;
+    uint8_t data_rate = 23;
+    int8_t tx_power_level = 18;
+
+    uint8_t be_cwmin = 2;
+    uint32_t be_cwmax = 2784;
+    uint8_t be_aifsn = 202;
+    uint32_t be_txop_limit = 10001;
+    bool be_mand = true;
+
+    uint8_t bk_cwmin = 1;
+    uint32_t bk_cwmax = 1340;
+    uint8_t bk_aifsn = 201;
+    uint32_t bk_txop_limit = 10002;
+    bool bk_mand = false;
+
+    uint8_t vi_cwmin = 3;
+    uint32_t vi_cwmax = 1026;
+    uint8_t vi_aifsn = 203;
+    uint32_t vi_txop_limit = 10003;
+    bool vi_mand = false;
+
+    uint8_t vo_cwmin = 4;
+    uint32_t vo_cwmax = 1587;
+    uint8_t vo_aifsn = 204;
+    uint32_t vo_txop_limit = 10004;
+    bool vo_mand = true;
+
+    // data set-2
+    uint8_t op_class2 = 19;
+    uint8_t chan_no2 = 178;
+    bool is_adaptable2 = false;
+    uint8_t data_rate2 = 35;
+    int8_t tx_power_level2 = 48;
+
+    ProviderChannelInfoTable *chan_info_tb = create_wme_prv_chan_tb();
+    add_wme_prv_chan_tb(op_class, chan_no, is_adaptable, data_rate, tx_power_level, 
+        be_cwmin, be_cwmax, be_aifsn, be_txop_limit, be_mand,
+        bk_cwmin, bk_cwmax, bk_aifsn, bk_txop_limit, bk_mand,
+        vi_cwmin, vi_cwmax, vi_aifsn, vi_txop_limit, vi_mand,
+        vo_cwmin, vo_cwmax, vo_aifsn, vo_txop_limit, vo_mand, chan_info_tb);
+
+    add_wme_prv_chan_tb(op_class2, chan_no2, is_adaptable2, data_rate2, tx_power_level2, 
+        be_cwmin, be_cwmax, be_aifsn, be_txop_limit, be_mand,
+        bk_cwmin, bk_cwmax, bk_aifsn, bk_txop_limit, bk_mand,
+        vi_cwmin, vi_cwmax, vi_aifsn, vi_txop_limit, vi_mand,
+        vo_cwmin, vo_cwmax, vo_aifsn, vo_txop_limit, vo_mand, chan_info_tb);
+    
+    ProviderChannelInfoTableEntry *entry = get_wme_prv_chan_entry(0, chan_info_tb);
+    ProviderChannelInfoTableEntry *entry2 = get_wme_prv_chan_entry(1, chan_info_tb);
+    show_wme_chan_info_entry(entry);
+    printf("-----------------------------------------------\n");
+    show_wme_chan_info_entry(entry2);
+
+    free(chan_info_tb);
+}
+
 int main(){
-    exec_test_provider_tb();
+    // exec_test_provider_tb();
+    exex_test_channelInfo_tb();
 }
