@@ -147,3 +147,106 @@ printf(".... Table Entry Info ....\n");
     printf("ProviderServiceStatus: %d\n", entry.ProviderServiceStatus);
     printf(".... End ....\n");
 }
+
+// methods for  ProviderChannelInfoTable
+
+ProviderChannelInfoTable *create_wme_prv_chan_tb(){
+    ProviderChannelInfoTable *tb_obj = calloc(1, sizeof(ProviderChannelInfoTable));
+    if(tb_obj == NULL){
+        // should be panic
+        return NULL;
+    }
+    uint8_t oid[32] = "1.3.111.2.1609.3.4.2.1.3" ; 
+    memcpy(tb_obj->oid, oid, 32) ;
+    tb_obj->size = 0;
+    return tb_obj;
+}
+
+void add_wme_prv_chan_tb(uint8_t op_class, uint8_t chan_no, bool is_adaptable, uint8_t data_rate, int8_t tx_pwr_level,
+    uint8_t edcaBe_CWmin, uint32_t edcaBe_CWmax, uint8_t edcaBe_Aifsn, uint32_t edcaBe_TxopLimit, bool edcaBe_Mandatory,
+    uint8_t edcaBk_CWmin, uint32_t edcaBk_CWmax, uint8_t edcaBk_Aifsn, uint32_t edcaBk_TxopLimit, bool edcaBk_Mandatory,
+    uint8_t edcaVi_CWmin, uint32_t edcaVi_CWmax, uint8_t edcaVi_Aifsn, uint32_t edcaVi_TxopLimit, bool edcaVi_Mandatory,
+    uint8_t edcaVo_CWmin, uint32_t edcaVo_CWmax, uint8_t edcaVo_Aifsn, uint32_t edcaVo_TxopLimit, bool edcaVo_Mandatory, 
+    ProviderChannelInfoTable *self){
+    ProviderChannelInfoTableEntry *entry = calloc(1, sizeof(ProviderChannelInfoTableEntry));
+    if(entry == NULL){
+        return;
+    }
+    entry->ProviderChannelInfoTableIndex = self->size;
+    entry->ProviderChannelInfoOperatingClass = op_class;
+    entry->ProviderChannelInfoChannelNumber = chan_no;
+    entry->ProviderChannelInfoAdaptable = is_adaptable;
+    entry->ProviderChannelInfoDataRate = data_rate;
+    entry->ProviderChannelInfoTransmitPowerLevel = tx_pwr_level;
+
+    entry->ProviderChannelInfoEdcaBkCWmin = edcaBk_CWmin;
+	entry->ProviderChannelInfoEdcaBkCWmax = edcaBk_CWmax;
+	entry->ProviderChannelInfoEdcaBkAifsn = edcaBk_Aifsn;
+	entry->ProviderChannelInfoEdcaBkTxopLimit = edcaBk_TxopLimit;
+    entry->ProviderChannelInfoEdcaBkMandatory = edcaBk_Mandatory;
+
+    entry->ProviderChannelInfoEdcaBeCWmin = edcaBe_CWmin;
+	entry->ProviderChannelInfoEdcaBeCWmax = edcaBe_CWmax;
+	entry->ProviderChannelInfoEdcaBeAifsn = edcaBe_Aifsn;
+	entry->ProviderChannelInfoEdcaBeTxopLimit = edcaBe_TxopLimit;
+    entry->ProviderChannelInfoEdcaBeMandatory = edcaBe_Mandatory;
+
+    entry->ProviderChannelInfoEdcaViCWmin = edcaVi_CWmin;
+	entry->ProviderChannelInfoEdcaViCWmax = edcaVi_CWmax;
+	entry->ProviderChannelInfoEdcaViAifsn = edcaVi_Aifsn;
+	entry->ProviderChannelInfoEdcaViTxopLimit = edcaVi_TxopLimit;
+    entry->ProviderChannelInfoEdcaViMandatory = edcaVi_Mandatory;
+
+    entry->ProviderChannelInfoEdcaVoCWmin = edcaVo_CWmin;
+	entry->ProviderChannelInfoEdcaVoCWmax = edcaVo_CWmax;
+	entry->ProviderChannelInfoEdcaVoAifsn = edcaVo_Aifsn;
+	entry->ProviderChannelInfoEdcaVoTxopLimit = edcaVo_TxopLimit;
+    entry->ProviderChannelInfoEdcaVoMandatory = edcaVo_Mandatory;
+
+    memcpy((self->table) + (self->size), entry, sizeof(ProviderChannelInfoTableEntry));
+    self->size++;
+
+    free(entry);
+}
+
+// get Channel Info Entry by index
+ProviderChannelInfoTableEntry *get_wme_prv_chan_entry(size_t index, ProviderChannelInfoTable *self){
+    if(self->size <= index){
+        return NULL;
+    }
+    return (self->table) + index;
+}
+
+// only for debugging purposes
+void show_wme_chan_info(size_t indx, ProviderChannelInfoTable *self){
+    ProviderChannelInfoTableEntry entry = self->table[indx];
+    printf("size: %ld\n",  self->size );
+    show_wme_chan_info_entry(&entry);  
+}
+
+void show_wme_chan_info_entry(ProviderChannelInfoTableEntry *entry){
+    printf("\n----- channel Info Entry ------\n");
+    printf("ProviderChannelInfoTableIndex: %d\n", entry->ProviderChannelInfoTableIndex);
+    printf("ProviderChannelInfoOperatingClass: %d\n", entry->ProviderChannelInfoOperatingClass);
+    printf("ProviderChannelInfoChannelNumber: %d\n", entry->ProviderChannelInfoChannelNumber);
+    if(entry->ProviderChannelInfoAdaptable){
+        printf("ProviderChannelInfoAdaptable: true\n");
+    } else {
+        printf("ProviderChannelInfoAdaptable: false\n");
+    }
+    printf("ProviderChannelInfoDataRate: %d\n", entry->ProviderChannelInfoDataRate);
+    printf("ProviderChannelInfoTransmitPowerLevel : %d\n", entry->ProviderChannelInfoTransmitPowerLevel);
+    
+    printf("ProviderChannelInfoEdcaBkCWmin: %d\n", entry->ProviderChannelInfoEdcaBkCWmin);
+    printf("ProviderChannelInfoEdcaBkCWmax: %d\n", entry->ProviderChannelInfoEdcaBkCWmax);
+    printf("ProviderChannelInfoEdcaBkAifsn: %d\n", entry->ProviderChannelInfoEdcaBkAifsn);
+    printf("ProviderChannelInfoEdcaBkTxopLimit: %d\n", entry->ProviderChannelInfoEdcaBkTxopLimit);
+
+    if (entry->ProviderChannelInfoEdcaBkMandatory){
+        printf("ProviderChannelInfoEdcaBkMandatory: true\n");
+    } else {
+        printf("ProviderChannelInfoEdcaBkMandatory: false\n");
+    }
+
+    printf("------ End --------\n");
+}
