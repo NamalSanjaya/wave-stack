@@ -7,7 +7,7 @@
 #include "../../include/1609_3/ieee1609dot3_mib.h"
 
 int main(){
-    ProviderServiceRequestTable *db = create_provider_tb();
+    ProviderServiceRequestTable *db = create_wme_provider_tb();
 
     // data set 1
     enum wsa_type  wsatype = unsecured;
@@ -53,11 +53,10 @@ int main(){
     wme_prvtb_add(wsatype2, psid2, psc2, chan_access2, best_available2, op_class2, ps_chan_no2, wsa_chan_no2, repeat_rate2, ip_service2, ipv6_address2, provider_mac_addr2,
     service_port2, rcpi_threshold2, wsa_count_threshold2, wsa_count_threshold_intrv2, serv_status2, db);
 
-    ProviderServiceRequestTableEntry *entry = wme_prvtb_get_by_psid(psid, db);
-    ProviderServiceRequestTableEntry *entry2 = wme_prvtb_get_by_psid(psid2, db);
-    show_tb_entry(*entry);
+    ProviderServiceRequestTableEntry *entry = get_wme_prvtb(0, db);
+    ProviderServiceRequestTableEntry *entry2 = get_wme_prvtb(1, db);
+    show_wme_prvtb_entry(*entry);
     printf("\n--------------------------------------------------------\n");
-    show_tb_entry(*entry2);
-    free(entry);
-    free(entry2);
+    show_wme_prvtb_entry(*entry2);
+    free(db);
 }
