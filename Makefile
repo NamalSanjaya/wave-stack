@@ -23,5 +23,5 @@ clean:
 sendcapture:
 	sudo ./executable
 
-getexec: $(OBJS)
+genexec: $(OBJS)
 	$(CC) $(CFLAGS) -o executable $(OBJS) -lpcap
