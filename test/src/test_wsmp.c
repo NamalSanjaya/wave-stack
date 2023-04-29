@@ -81,6 +81,7 @@ void print_iex(struct wsmp_iex *iex) {
             iex->loc_3d.elevation[1]);
      printf("advert_id.len:    %d\n", iex->advert_id.len);
 
+     printf("advert_id.id: ");
      for (i = 0; i < iex->advert_id.len; i++)
           printf("%02x", iex->advert_id.id[i]);
 
@@ -148,6 +149,119 @@ void print_wsm(struct wsmp_wsm *wsm) {
           printf("%02x ", wsm->data[i]);
 
      printf("\n-- END WSM --\n");
+}
+
+void print_sii(struct wsmp_sii *sii) {
+     printf("\nBEGIN SII\n");
+     printf("psid:       %08x\n", sii->psid);
+     printf("chan_index: %d\n", sii->chan_index);
+     printf("use_iex:    %d\n", sii->use_iex);
+
+     if (sii->use_iex) {
+          printf("iex:\n");
+          print_iex(sii->iex);
+          printf("\n");
+     }
+
+     printf("\nEND SII\n");
+}
+
+void print_cii(struct wsmp_cii *cii) {
+     printf("\nBEGIN CII\n");
+     printf("op_class:  %d\n", cii->op_class);
+     printf("chan:      %d\n", cii->chan);
+     printf("tx_pow:    %d\n", cii->tx_pow);
+     printf("adapt:     %d\n", cii->adapt);
+     printf("data_rate: %d\n", cii->data_rate);
+     printf("use_iex:   %d\n", cii->use_iex);
+
+     if (cii->use_iex) {
+          printf("iex:\n");
+          print_iex(cii->iex);
+          printf("\n");
+     }
+
+     printf("\nEND CII\n");
+}
+
+void print_wra(struct wsmp_wra *wra) {
+     printf("\nBEGIN WRA\n");
+     printf("lifetime:    %02x%02x\n", wra->lifetime[0], wra->lifetime[1]);
+     printf("ip_prefix:   ");
+
+     int i;
+     for (i = 0; i < 16; i++)
+          printf("%02x", wra->ip_prefix[i]);
+
+     printf("\n");
+     printf("prefix_len: %d\n", wra->prefix_len);
+     printf("gateway:    ");
+
+     for (i = 0; i < 16; i++)
+          printf("%02x", wra->gateway[i]);
+
+     printf("\n");
+     printf("dns:    ");
+
+     for (i = 0; i < 16; i++)
+          printf("%02x", wra->dns[i]);
+
+     printf("\n");
+     printf("use_iex:   %d\n", wra->use_iex);
+
+     if (wra->use_iex) {
+          printf("iex:\n");
+          print_iex(wra->iex);
+          printf("\n");
+     }
+
+     printf("\nEND WRA\n");
+}
+
+void print_wsa(struct wsmp_wsa *wsa) {
+     printf("\nBEGIN WSA\n");
+     printf("version:       %d\n", wsa->version);
+     printf("id:            %d\n", wsa->id);
+     printf("content_count: %d\n", wsa->content_count);
+     printf("use_iex:       %d\n", wsa->use_iex);
+
+     if (wsa->use_iex) {
+          printf("iex:\n");
+          print_iex(wsa->iex);
+          printf("\n");
+     }
+
+     printf("sii_count:    %d\n", wsa->sii_count);
+
+     int i;
+
+     if (wsa->sii_count > 0) {
+          printf("sis:\n");
+          for (i = 0; i < wsa->sii_count; i++) {
+               printf("sis[%d]:\n", i);
+               print_sii(wsa->sis[i]);
+               printf("\n");
+          }
+     }
+
+     printf("cii_count:    %d\n", wsa->cii_count);
+     if (wsa->cii_count > 0) {
+          printf("cis:\n");
+          for (i = 0; i < wsa->cii_count; i++) {
+               printf("cis[%d]:\n", i);
+               print_cii(wsa->cis[i]);
+               printf("\n");
+          }
+     }
+
+     printf("use_wra      %d\n", wsa->use_wra);
+     if (wsa->use_wra) {
+          printf("wra:\n");
+          print_wra(wsa->wra);
+          printf("\n");
+     }
+
+     printf("\nEND WSA\n");
 }
 
 // print binary format of 1-byte value
