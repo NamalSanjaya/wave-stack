@@ -4,10 +4,14 @@
 #include <stdlib.h>
 
 #include "../../include/1609_3/wme.h"
+#include "../../include/pdu_buf.h"
+#include "../../include/1609_3/wsmp_encode.h"
+#include "../../include/1609_3/wsmp_decode.h"
 #include "../include/test_wsmp.h"
 
 ProviderServiceRequestTable *exec_test_provider_tb();
 ProviderChannelInfoTable *exec_test_channelInfo_tb();
+void exec_test_wsa();
 
 ProviderServiceRequestTable *exec_test_provider_tb(){
     // printf("\n----- Provider Service Request Table Info -----\n");
@@ -128,18 +132,31 @@ ProviderChannelInfoTable *exec_test_channelInfo_tb(){
     return chan_info_tb;
 }
 
-int main(){
+void exec_test_wsa(){
     ProviderServiceRequestTable *pr_tb = exec_test_provider_tb();
     ProviderChannelInfoTable *chan_info_tb = exec_test_channelInfo_tb();
     uint8_t wsa_id = 4;
+    int err[1];
 
+    wave_pdu *pdu = create_pdu_buf();
     struct wsmp_wsa *wsa_metadata = create_wsa_metadata(wsa_id, pr_tb, chan_info_tb);
-
-    print_wsa(wsa_metadata);
+    wsmp_wsa_encode(wsa_metadata, pdu, err, WSMP_STRICT);
+    if(*err) {
+        fprintf(stderr, "went wrong in wsa encoding %d", *err);
+        exit(1);
+    }
+    // print_binx(pdu->current, pdu->offset);
+    // print_wsa(wsa_metadata);
+    struct wsmp_wsa *decoded_wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
+    print_wsa(decoded_wsa);
 
     free(pr_tb);
     free(chan_info_tb);
     free(wsa_metadata);
+    free_pbuf(pdu);
+    free(decoded_wsa);
+}
 
-    printf("\n------ Done --------\n");
+int main(){
+    exec_test_wsa();
 }

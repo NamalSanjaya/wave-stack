@@ -29,7 +29,7 @@ struct wsmp_iex *wsmp_iex_decode(const uint8_t *msg, size_t *cnt, size_t len, in
 struct wsmp_sii *wsmp_sii_decode(const uint8_t *msg, size_t *cnt, size_t len, int *err, int mode);
 struct wsmp_cii *wsmp_cii_decode(const uint8_t *msg, size_t *cnt, size_t len, int *err, int mode);
 struct wsmp_wra *wsmp_wra_decode(const uint8_t *msg, size_t *cnt, size_t len, int *err, int mode);
-struct wsmp_wsa *wsmp_wsa_decode(const uint8_t *msg, size_t *cnt, size_t len, int *err, int mode);
+struct wsmp_wsa *wsmp_wsa_decode(wave_pdu *pdu, int *err, int mode);
 struct wsmp_wsm *wsmp_wsm_decode(wave_pdu *pdu, int *err, int mode);
 
 #endif /* _WSMP_DECODE_H */

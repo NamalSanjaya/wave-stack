@@ -574,92 +574,103 @@ out:
      return ret;
 }
 
-struct wsmp_wsa *wsmp_wsa_decode(const uint8_t *msg, size_t *cnt, size_t len, int *err, int mode) {
-     struct wsmp_wsa *ret = calloc(1, sizeof(struct wsmp_wsa));
-     size_t i[1];
+struct wsmp_wsa *wsmp_wsa_decode(wave_pdu *pdu, int *err, int mode) {
+    struct wsmp_wsa *ret = calloc(1, sizeof(struct wsmp_wsa));
+	if(ret == NULL) {
+        fmt_error(WAVE_ERROR,"unable to allocate memory to decode wsmp_wsa");
+        return NULL;
+    }
+    size_t i[1];
 
-     *i = *cnt;
-     *err = 0;
+	uint8_t *msg = calloc(pdu->offset, 1);
+	if(msg == NULL) { 
+        fmt_error(WAVE_ERROR,"unable to allocate memory to decode wsa");
+        return NULL;
+    }
+	memcpy(msg, pdu->current, pdu->offset);
+	size_t len = pdu->offset;
+	*i = 0;
+	*err = 0;
 
-     if (mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE) {
-	  fprintf(stderr, "ERROR: mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE\n");
-	  *err = -WSMP_EMODE;
-	  goto out;
-     }
+	if (mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE) {
+		fprintf(stderr, "ERROR: mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE\n");
+		*err = -WSMP_EMODE;
+		goto out;
+	}
 
-     if (len < WSMP_WSA_MIN || len > WSMP_MAXSIZE) {
-	  fprintf(stderr, "ERROR: len < WSMP_WSA_MIN || len > WSMP_MAXSIZE\n");
-	  *err = -WSMP_EFAULT;
-	  goto out;
-     }
+	if (len < WSMP_WSA_MIN || len > WSMP_MAXSIZE) {
+		fprintf(stderr, "ERROR: len < WSMP_WSA_MIN || len > WSMP_MAXSIZE\n");
+		*err = -WSMP_EFAULT;
+		goto out;
+	}
 
-     uint8_t tmp = 0;
+    uint8_t tmp = 0;
 
-     _g(msg, i, &tmp, len, err);
+    _g(msg, i, &tmp, len, err);
 
-     ret->version = tmp >> 4;
+    ret->version = tmp >> 4;
 
-     if (ret->version != WSMP_VERSION) {
-	  fprintf(stderr, "ERROR: ret->version != WSMP_VERSION\n");
-	  *err = -WSMP_ENOSUPPORT;
-	  goto out;
-     }
+    if (ret->version != WSMP_VERSION) {
+		fprintf(stderr, "ERROR: ret->version != WSMP_VERSION\n");
+		*err = -WSMP_ENOSUPPORT;
+	  	goto out;
+    }
 
-     uint8_t hoi = tmp & 0x0F;
+    uint8_t hoi = tmp & 0x0F;
 
-     ret->use_iex = (hoi & 0x08) >> 3;
-     ret->sii_count = (hoi & 0x04) >> 2;
-     ret->cii_count = (hoi & 0x02) >> 1;
-     ret->use_wra = (hoi &0x01);
+	ret->use_iex = (hoi & 0x08) >> 3;
+	ret->sii_count = (hoi & 0x04) >> 2;
+	ret->cii_count = (hoi & 0x02) >> 1;
+	ret->use_wra = (hoi &0x01);
 
-     _g(msg, i, &tmp, len, err);
+	_g(msg, i, &tmp, len, err);
 
-     ret->id = tmp >> 4;
-     ret->content_count = tmp & 0x0F;
+	ret->id = tmp >> 4;
+	ret->content_count = tmp & 0x0F;
 
-     if (ret->use_iex) {
-	  size_t iex_cnt = *i;
-	  struct wsmp_iex *iex = wsmp_iex_decode(msg, &iex_cnt, len, err, mode);
+	if (ret->use_iex) {
+		size_t iex_cnt = *i;
+		struct wsmp_iex *iex = wsmp_iex_decode(msg, &iex_cnt, len, err, mode);
 
-	  *i = iex_cnt;
-	  ret->iex = iex;
-     }
+		*i = iex_cnt;
+		ret->iex = iex;
+	}
 
-     int j = 0;
+    int j = 0;
 
-     if (ret->sii_count) {
-	  _g_c(msg, i, &ret->sii_count, len, err);
-	  ret->sis = calloc(ret->sii_count, sizeof(struct wsmp_sii));
+    if (ret->sii_count) {
+		_g_c(msg, i, &ret->sii_count, len, err);
+		ret->sis = calloc(ret->sii_count, sizeof(struct wsmp_sii));
 
-	  for (j = 0; j < ret->sii_count; j++) {
-	       size_t sii_cnt = *i;
-	       struct wsmp_sii *sii = wsmp_sii_decode(msg, &sii_cnt, len, err, mode);
+		for (j = 0; j < ret->sii_count; j++) {
+			size_t sii_cnt = *i;
+			struct wsmp_sii *sii = wsmp_sii_decode(msg, &sii_cnt, len, err, mode);
 
-	       *i = sii_cnt;
-	       ret->sis[j] = sii;
-	  }
-     }
+			*i = sii_cnt;
+			ret->sis[j] = sii;
+		}
+    }
 
-     if (ret->cii_count) {
-	  _g_c(msg, i, &ret->cii_count, len, err);
-	  ret->cis = calloc(ret->cii_count, sizeof(struct wsmp_cii));
+    if (ret->cii_count) {
+		_g_c(msg, i, &ret->cii_count, len, err);
+		ret->cis = calloc(ret->cii_count, sizeof(struct wsmp_cii));
 
-	  for (j = 0; j < ret->cii_count; j++) {
-	       size_t cii_cnt = *i;
-	       struct wsmp_cii *cii = wsmp_cii_decode(msg, &cii_cnt, len, err, mode);
+		for (j = 0; j < ret->cii_count; j++) {
+			size_t cii_cnt = *i;
+			struct wsmp_cii *cii = wsmp_cii_decode(msg, &cii_cnt, len, err, mode);
 
-	       *i = cii_cnt;
-	       ret->cis[j] = cii;
-	  }
-     }
+			*i = cii_cnt;
+			ret->cis[j] = cii;
+		}
+	}
 
-     if (ret->use_wra) {
-	  size_t wra_cnt = *i;
-	  struct wsmp_wra *wra = wsmp_wra_decode(msg, &wra_cnt, len, err, mode);
+    if (ret->use_wra) {
+		size_t wra_cnt = *i;
+		struct wsmp_wra *wra = wsmp_wra_decode(msg, &wra_cnt, len, err, mode);
 
-	  *i = wra_cnt;
-	  ret->wra = wra;
-     }
+		*i = wra_cnt;
+		ret->wra = wra;
+    }
 
      /* if (*i != len) { */
      /*		  fprintf(stderr, "ERROR: *i != len\n"); */
@@ -668,8 +679,10 @@ struct wsmp_wsa *wsmp_wsa_decode(const uint8_t *msg, size_t *cnt, size_t len, in
      /* } */
 
 out:
-     *cnt = *i;
-     return ret;
+    pdu->offset -= *i;
+	pdu->current += *i; 
+	free(msg);
+    return ret;
 }
 
 struct wsmp_wsm *wsmp_wsm_decode(wave_pdu *pdu, int *err, int mode) {
