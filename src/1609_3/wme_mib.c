@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../../include/1609_3/ieee1609dot3_mib.h"
 #include "../../include/1609_3/wme.h"
 
 // get by Provider Table Index
@@ -32,7 +31,7 @@ ProviderServiceRequestTableEntry *wme_prvtb_get_by_psid(uint32_t psid, ProviderS
 // Add a Service metadata to ProviderServiceRequest Table
 void wme_prvtb_add(enum wsa_type  wsatype, uint32_t psid, uint8_t *psc, enum channel_access  chan_access, bool best_available, uint32_t op_class, 
     uint8_t  ps_chan_no, uint8_t  wsa_chan_no, uint8_t  repeat_rate, bool ip_service, uint8_t *ipv6_address, uint8_t *provider_mac_addr,    
-    uint32_t service_port, uint8_t  rcpi_threshold, uint8_t  wsa_count_threshold, uint8_t  wsa_count_threshold_intrv, enum service_status  serv_status,
+    uint16_t service_port, int8_t  rcpi_threshold, uint8_t  wsa_count_threshold, uint8_t  wsa_count_threshold_intrv, enum service_status  serv_status,
     ProviderServiceRequestTable *self){
     ProviderServiceRequestTableEntry *entry = calloc(1, sizeof(ProviderServiceRequestTableEntry));
     if(entry == NULL){
@@ -49,8 +48,8 @@ void wme_prvtb_add(enum wsa_type  wsatype, uint32_t psid, uint8_t *psc, enum cha
     entry->ProviderWsaChannelNumber = wsa_chan_no;
     entry->ProviderRepeatRate = repeat_rate;
     entry->ProviderIpService = ip_service;
-    memcpy(entry->ProviderIpv6Address, ipv6_address, 15);
-    memcpy(entry->ProviderMacAddress, provider_mac_addr, 11);
+    memcpy(entry->ProviderIpv6Address, ipv6_address, 16);
+    memcpy(entry->ProviderMacAddress, provider_mac_addr, 6);
     entry->ProviderServicePort = service_port;
     entry->ProviderRcpiThreshold = rcpi_threshold;
     entry->ProviderWsaCountThreshold = wsa_count_threshold;
@@ -128,7 +127,7 @@ printf(".... Table Entry Info ....\n");
     }
 
     printf("ProviderIpv6Address: ");
-    for (size_t i = 0; i < 15; i++){
+    for (size_t i = 0; i < 16; i++){
         if(entry.ProviderIpv6Address[i] == 0){
             break;
         }
@@ -136,7 +135,7 @@ printf(".... Table Entry Info ....\n");
     }
 
     printf("\nProviderMacAddress: ");
-    for (size_t i = 0; i < 11; i++){
+    for (size_t i = 0; i < 6; i++){
         printf("%d ", entry.ProviderMacAddress[i]);
     }
 
@@ -215,6 +214,16 @@ ProviderChannelInfoTableEntry *get_wme_prv_chan_entry(size_t index, ProviderChan
         return NULL;
     }
     return (self->table) + index;
+}
+
+// Get the `ProviderChannelInfoTableIndex`
+uint8_t get_chan_index(uint8_t chan_no, ProviderChannelInfoTable *self){
+    for (uint8_t i = 0; i < self->size; i++){
+        if((self->table)[i].ProviderChannelInfoChannelNumber == chan_no){
+            return i+1;
+        }
+    }
+    return 0;
 }
 
 // only for debugging purposes
