@@ -4,30 +4,30 @@
 #include <stdlib.h>
 
 #include "../../include/1609_3/wme.h"
-#include "../../include/1609_3/ieee1609dot3_mib.h"
+#include "../include/test_wsmp.h"
 
-void exec_test_provider_tb();
-void exex_test_channelInfo_tb();
+ProviderServiceRequestTable *exec_test_provider_tb();
+ProviderChannelInfoTable *exec_test_channelInfo_tb();
 
-void exec_test_provider_tb(){
-    printf("\n----- Provider Service Request Table Info -----\n");
+ProviderServiceRequestTable *exec_test_provider_tb(){
+    // printf("\n----- Provider Service Request Table Info -----\n");
     ProviderServiceRequestTable *db = create_wme_provider_tb();
 
     // data set 1
     enum wsa_type  wsatype = unsecured;
     uint32_t psid = 0xC00305;
     uint8_t psc[32] = "weather information nice";
-    enum channel_access  chan_access = continuous;
+    enum channel_access  chan_access = alternatingTimeslot1Only;
     bool best_available = true;
-    uint32_t op_class = 14;
-    uint8_t  ps_chan_no = 178;
-    uint8_t  wsa_chan_no = 174;
+    uint32_t op_class = 10;
+    uint8_t  ps_chan_no = 168;
+    uint8_t  wsa_chan_no = 178;
     uint8_t  repeat_rate = 10; 
     bool ip_service = false; 
-    uint8_t ipv6_address[15] = ""; 
-    uint8_t provider_mac_addr[11] = "ff:ff:ff:ff" ;   
-    uint32_t service_port = 0; 
-    uint8_t  rcpi_threshold = 120;
+    uint8_t ipv6_address[16] = ""; 
+    uint8_t provider_mac_addr[6] = {161, 35, 69, 103, 137, 203};   // In decimal notation
+    uint16_t service_port = 0; 
+    int8_t  rcpi_threshold = -20;
     uint8_t  wsa_count_threshold = 23; 
     uint8_t  wsa_count_threshold_intrv = 5; 
     enum service_status  serv_status = satisfied;
@@ -36,17 +36,17 @@ void exec_test_provider_tb(){
     enum wsa_type  wsatype2 = secured;
     uint32_t psid2 = 0xC00307;
     uint8_t psc2[32] = "traffic information within 1km";
-    enum channel_access  chan_access2 = alternatingTimeslot0Only;
+    enum channel_access  chan_access2 = alternatingTimeslot1Only;
     bool best_available2 = false;
-    uint32_t op_class2 = 16;
-    uint8_t  ps_chan_no2 = 172;
-    uint8_t  wsa_chan_no2 = 188;
-    uint8_t  repeat_rate2 = 14; 
+    uint32_t op_class2 = 10;
+    uint8_t  ps_chan_no2 = 184;
+    uint8_t  wsa_chan_no2 = 178;
+    uint8_t  repeat_rate2 = 10; 
     bool ip_service2 = true; 
-    uint8_t ipv6_address2[15] = "192.188.101.129"; 
-    uint8_t provider_mac_addr2[11] = "3f:12:af:bc" ;   
-    uint32_t service_port2 = 8000; 
-    uint8_t  rcpi_threshold2 = 178;
+    uint8_t ipv6_address2[16] = {32, 1, 13, 184, 133, 163, 0, 0, 0, 0, 138, 46, 3, 112, 115, 52};   // 2001:0db8:85a3:0000:0000:8a2e:0370:7334
+    uint8_t provider_mac_addr2[6] = {103, 56, 17, 98, 234, 12} ;   
+    uint16_t service_port2 = 8000; 
+    int8_t  rcpi_threshold2 = -8;
     uint8_t  wsa_count_threshold2 = 54; 
     uint8_t  wsa_count_threshold_intrv2 = 12; 
     enum service_status  serv_status2 = partiallySatisfied;
@@ -56,19 +56,20 @@ void exec_test_provider_tb(){
 
     wme_prvtb_add(wsatype2, psid2, psc2, chan_access2, best_available2, op_class2, ps_chan_no2, wsa_chan_no2, repeat_rate2, ip_service2, ipv6_address2, provider_mac_addr2,
     service_port2, rcpi_threshold2, wsa_count_threshold2, wsa_count_threshold_intrv2, serv_status2, db);
-
-    ProviderServiceRequestTableEntry *entry = get_wme_prvtb(0, db);
-    ProviderServiceRequestTableEntry *entry2 = get_wme_prvtb(1, db);
-    show_wme_prvtb_entry(*entry);
-    printf("\n--------------------------------------------------------\n");
-    show_wme_prvtb_entry(*entry2);
-    free(db);
+    // debugging purpose 
+    // ProviderServiceRequestTableEntry *entry = get_wme_prvtb(0, db);
+    // ProviderServiceRequestTableEntry *entry2 = get_wme_prvtb(1, db);
+    // show_wme_prvtb_entry(*entry);
+    // printf("\n--------------------------------------------------------\n");
+    // show_wme_prvtb_entry(*entry2);
+    // free(db);
+    return db;
 }
 
-void exex_test_channelInfo_tb(){
+ProviderChannelInfoTable *exec_test_channelInfo_tb(){
     // data set-1
-    uint8_t op_class = 12;
-    uint8_t chan_no = 172;
+    uint8_t op_class = 10;
+    uint8_t chan_no = 184;
     bool is_adaptable = true;
     uint8_t data_rate = 23;
     int8_t tx_power_level = 18;
@@ -98,8 +99,8 @@ void exex_test_channelInfo_tb(){
     bool vo_mand = true;
 
     // data set-2
-    uint8_t op_class2 = 19;
-    uint8_t chan_no2 = 178;
+    uint8_t op_class2 = 10;
+    uint8_t chan_no2 = 168;
     bool is_adaptable2 = false;
     uint8_t data_rate2 = 35;
     int8_t tx_power_level2 = 48;
@@ -116,17 +117,29 @@ void exex_test_channelInfo_tb(){
         bk_cwmin, bk_cwmax, bk_aifsn, bk_txop_limit, bk_mand,
         vi_cwmin, vi_cwmax, vi_aifsn, vi_txop_limit, vi_mand,
         vo_cwmin, vo_cwmax, vo_aifsn, vo_txop_limit, vo_mand, chan_info_tb);
-    
-    ProviderChannelInfoTableEntry *entry = get_wme_prv_chan_entry(0, chan_info_tb);
-    ProviderChannelInfoTableEntry *entry2 = get_wme_prv_chan_entry(1, chan_info_tb);
-    show_wme_chan_info_entry(entry);
-    printf("-----------------------------------------------\n");
-    show_wme_chan_info_entry(entry2);
+    // debugging purpose
+    // ProviderChannelInfoTableEntry *entry = get_wme_prv_chan_entry(0, chan_info_tb);
+    // ProviderChannelInfoTableEntry *entry2 = get_wme_prv_chan_entry(1, chan_info_tb);
+    // show_wme_chan_info_entry(entry);
+    // printf("-----------------------------------------------\n");
+    // show_wme_chan_info_entry(entry2);
 
-    free(chan_info_tb);
+    // free(chan_info_tb);
+    return chan_info_tb;
 }
 
 int main(){
-    // exec_test_provider_tb();
-    exex_test_channelInfo_tb();
+    ProviderServiceRequestTable *pr_tb = exec_test_provider_tb();
+    ProviderChannelInfoTable *chan_info_tb = exec_test_channelInfo_tb();
+    uint8_t wsa_id = 4;
+
+    struct wsmp_wsa *wsa_metadata = create_wsa_metadata(wsa_id, pr_tb, chan_info_tb);
+
+    print_wsa(wsa_metadata);
+
+    free(pr_tb);
+    free(chan_info_tb);
+    free(wsa_metadata);
+
+    printf("\n------ Done --------\n");
 }
