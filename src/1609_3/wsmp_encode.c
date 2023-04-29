@@ -211,7 +211,7 @@ uint8_t *wsmp_iex_encode(const struct wsmp_iex *curs, size_t *cnt, int *err, int
 	       case WSMP_EID_WSA_COUNT_THRESHOLD:
 		    _s(buf, i, WSMP_EID_WSA_COUNT_THRESHOLD, WSMP_MAXSIZE, err);
 		    _s(buf, i, 1,                            WSMP_MAXSIZE, err);
-		    _s(buf, i, curs->rcpi_thres,             WSMP_MAXSIZE, err);
+		    _s(buf, i, curs->count_thres,             WSMP_MAXSIZE, err);
 
 		    break;
 
@@ -436,13 +436,11 @@ out:
      return ret;
 }
 
-uint8_t *wsmp_wsa_encode(const struct wsmp_wsa *curs, size_t *cnt, int *err, int mode) {
+void wsmp_wsa_encode(const struct wsmp_wsa *curs, wave_pdu *pdu, int *err, int mode) {
      uint8_t buf[WSMP_MAXSIZE];
-     uint8_t *ret;
      size_t i[1];
 
      *i = 0;
-     *cnt = 0;
      *err = 0;
 
      if (mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE) {
@@ -541,11 +539,7 @@ uint8_t *wsmp_wsa_encode(const struct wsmp_wsa *curs, size_t *cnt, int *err, int
      }
 
 out:
-     ret = calloc(*i, 1);
-     memcpy(ret, buf, *i);
-     *cnt = *i;
-
-     return ret;
+	add_data_to_pbuf(pdu, buf, *i, err);
 }
 
 void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, int *err, int mode) {
@@ -622,5 +616,4 @@ void wsmp_wsm_encode(const struct wsmp_wsm *curs, wave_pdu *pdu, int *err, int m
 
 out:
 	add_data_to_pbuf(pdu, buf, *i, err);
-    return ;
 }
