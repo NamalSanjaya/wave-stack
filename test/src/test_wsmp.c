@@ -220,6 +220,8 @@ void print_wra(struct wsmp_wra *wra) {
 
 void print_wsa(struct wsmp_wsa *wsa) {
      printf("\nBEGIN WSA\n");
+     printf("proto version: %d\n", wsa->proto_version);
+     printf("WSA Type:      %d\n", wsa->wsaType);
      printf("version:       %d\n", wsa->version);
      printf("id:            %d\n", wsa->id);
      printf("content_count: %d\n", wsa->content_count);

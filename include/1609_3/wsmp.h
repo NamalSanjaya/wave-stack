@@ -238,6 +238,8 @@ struct wsmp_wra {
 };
 
 struct wsmp_wsa {
+     uint8_t proto_version;  // Ieee1609Dot2Data fields (IEEE 1609.2 Std)
+     enum wsa_type wsaType;
      uint8_t version;       /* 0 to 15 */
      uint8_t id;            /* WSA Identifier, 0 to 15 */
      uint8_t content_count; /* 0 to 15 */

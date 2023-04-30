@@ -607,6 +607,12 @@ struct wsmp_wsa *wsmp_wsa_decode(wave_pdu *pdu, int *err, int mode) {
     uint8_t tmp = 0;
 
     _g(msg, i, &tmp, len, err);
+	ret->proto_version = tmp;
+
+    _g(msg, i, &tmp, len, err);
+	ret->wsaType = tmp;
+
+    _g(msg, i, &tmp, len, err);
 
     ret->version = tmp >> 4;
 

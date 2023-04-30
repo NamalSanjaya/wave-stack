@@ -6,6 +6,8 @@
 #include "../../include/1609_3/wme.h"
 #include "../../include/1609_3/wave_llc.h"
 #include "../../include/1609_3/wsmp.h"
+#include "../../include/pdu_buf.h"
+#include "../../include/1609_3/wsmp_encode.h"
 
 struct wsmp_iex *create_wsa_iex(uint8_t repeat_rate, bool use_loc2d,  uint32_t loc2d_latitude, uint32_t loc2d_longitude, bool use_loc3d,
     uint32_t loc3d_latitude, uint32_t loc3d_longitude, uint32_t loc3d_elevation, uint16_t advert_len, uint8_t *advert_id){
@@ -176,6 +178,8 @@ struct wsmp_cii *create_wsa_cii(uint8_t op_class, uint8_t chan_no, int8_t tx_pow
  */
 struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable *provider_serv_tb, ProviderChannelInfoTable *provider_chan_tb) {
     struct wsmp_wsa *wsa = calloc(1, sizeof(struct wsmp_wsa));
+    wsa->proto_version = WSMP_VERSION;
+    wsa->wsaType = unsecured;
     wsa->version = WSMP_VERSION;
     if (wsa_id > 15){
         // TODO: log an error
