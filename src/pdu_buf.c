@@ -63,3 +63,15 @@ void free_pbuf(wave_pdu *pdu){
     free(pdu->head);
     free(pdu);
 }
+
+PduTable *create_pduTable(){
+    PduTable *pdu_tb =  calloc(1, sizeof(PduTable));
+    if (pdu_tb == NULL) fmt_panic("unable to allocate memory to create PDU table");
+    pdu_tb->wsa_store = calloc(16, sizeof(wave_pdu));
+    if (pdu_tb->wsa_store  == NULL) fmt_panic("unable to allocate memory to create wave_pdu struct");
+    return pdu_tb;
+}
+
+wave_pdu *get_pdu(uint8_t indx, PduTable *pdu_tb){
+    return pdu_tb->wsa_store[indx];
+}
