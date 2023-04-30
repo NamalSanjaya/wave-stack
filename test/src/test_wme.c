@@ -12,6 +12,7 @@
 ProviderServiceRequestTable *exec_test_provider_tb();
 ProviderChannelInfoTable *exec_test_channelInfo_tb();
 void exec_test_wsa();
+void test_provider_service_req();
 
 ProviderServiceRequestTable *exec_test_provider_tb(){
     // printf("\n----- Provider Service Request Table Info -----\n");
@@ -157,6 +158,41 @@ void exec_test_wsa(){
     free(decoded_wsa);
 }
 
+void test_provider_service_req(){
+    uint16_t local_service_index = 1;
+    enum action act = add;
+    uint8_t dest_mac_addr[6] = {255, 255, 255, 255, 255, 255}; // brodcast address
+    enum wsa_type wsatype = unsecured;
+    uint32_t psid = 0xC00305;
+    uint8_t psc[32] = "accident alerts";
+    uint8_t sch_id = 0;
+    uint8_t wsa_chan_id = 178;
+    enum time_slot chan_access = alternatingTimeslot1Only;
+    uint8_t repeat_rate = 12;
+    bool ip_service = false;
+    uint8_t ipv6_addr[16] = "";
+    uint16_t service_port = 0;
+    uint8_t provider_mac_addr[6] = {103, 56, 17, 98, 234, 12}; 
+    int8_t rcpi_threshold = -13;
+    uint8_t wsa_count_threshold = 8;
+    uint8_t wsa_count_thd_interval = 5;
+    uint8_t info_elements_indicator = 0;
+    uint16_t sign_lifetime = 0;
+    ProviderServiceRequestTable *pr_tb = exec_test_provider_tb();
+    ProviderChannelInfoTable *chan_info_tb = exec_test_channelInfo_tb();
+    PduTable *pdu_tb = create_pduTable();
+
+    wme_provider_service_req(local_service_index, act, dest_mac_addr, wsatype, psid, psc, sch_id, wsa_chan_id, chan_access, 
+        repeat_rate, ip_service, ipv6_addr, service_port, provider_mac_addr, rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, 
+        info_elements_indicator, sign_lifetime, pr_tb, chan_info_tb, pdu_tb);
+    
+    int err[1];
+    wave_pdu *pdu = get_pdu(4, pdu_tb);
+    struct wsmp_wsa *decoded_wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
+    print_wsa(decoded_wsa);
+
+}
+
 int main(){
-    exec_test_wsa();
+    test_provider_service_req();
 }
