@@ -375,7 +375,7 @@ struct wsmp_wsm *create_wsmp_metadata(uint8_t subtype, uint8_t tpid, uint8_t inf
      return wsm;
 }
 
-wave_pdu * wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, 
+wave_pdu *wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, 
      uint8_t info_elem_indicator, uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid){
      uint8_t subtype = 0, tpid=0; // currently only need to support for TPID=0
      wave_pdu *pdu = create_pdu_buf();

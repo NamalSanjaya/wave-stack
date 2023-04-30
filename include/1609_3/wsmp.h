@@ -30,8 +30,7 @@
 #include <stdint.h>
 
 #include "../../include/pdu_buf.h"
-#include "../../include/1609_3/wsmp.h"
-#include "../../include/1609_3/wave_llc.h"
+#include "../../include/1609_3/wme.h"
 
 #define WSMP_EID_TX_POWER_USED_80211   4
 #define WSMP_EID_2DLOCATION            5
