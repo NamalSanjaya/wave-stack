@@ -396,3 +396,4 @@ wave_pdu *wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_t
      free_wsm(wsm_metadata);
      return pdu;
 }
+
