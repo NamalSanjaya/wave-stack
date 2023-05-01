@@ -6,6 +6,8 @@
 #include "../../include/1609_3/wme.h"
 #include "../../include/1609_3/wave_llc.h"
 #include "../../include/1609_3/wsmp.h"
+#include "../../include/pdu_buf.h"
+#include "../../include/1609_3/wsmp_encode.h"
 
 struct wsmp_iex *create_wsa_iex(uint8_t repeat_rate, bool use_loc2d,  uint32_t loc2d_latitude, uint32_t loc2d_longitude, bool use_loc3d,
     uint32_t loc3d_latitude, uint32_t loc3d_longitude, uint32_t loc3d_elevation, uint16_t advert_len, uint8_t *advert_id){
@@ -176,6 +178,8 @@ struct wsmp_cii *create_wsa_cii(uint8_t op_class, uint8_t chan_no, int8_t tx_pow
  */
 struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable *provider_serv_tb, ProviderChannelInfoTable *provider_chan_tb) {
     struct wsmp_wsa *wsa = calloc(1, sizeof(struct wsmp_wsa));
+    wsa->proto_version = WSMP_VERSION;
+    wsa->wsaType = unsecured;
     wsa->version = WSMP_VERSION;
     if (wsa_id > 15){
         // TODO: log an error
@@ -282,19 +286,51 @@ struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable
     return wsa;
 }
 
-// void wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
-//     uint32_t psid, uint32_t psctx, uint8_t sch_id, uint8_t wsa_chan_id, enum timeslot chan_access, uint8_t repeat_rate, 
-//     bool is_ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
-//     uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime){
-//     /**
-//      * 1. wme-set.req()  (providerServiceInfo)
-//      * 2. wme-set.req()  (serviceStatus)
-//      *  -- check Annex B. providerServiceInfo table entry. `serviceStatus` is just a one parameter there.
-//      * 3. MLMEX-CHSTART.req() (channel access assignment. This primitive in IEEE 1609.4)
-//      * 4. Initiate transmit WSA (check whether do we need this. Because send WSA)
-//     */ 
+void wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
+    uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
+    bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
+    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime,
+    ProviderServiceRequestTable *prv_tb, ProviderChannelInfoTable *chan_tb, PduTable *pdu_tb){
+    /**
+     * ----- ACTION == Add -------
+     * 1. wme-set.req()  (providerServiceInfo) - done
+     * 2. wme-set.req()  (serviceStatus) - done
+     *  -- check Annex B. providerServiceInfo table entry. `serviceStatus` is just a one parameter there.
+     * 3. MLMEX-CHSTART.req() (channel access assignment. This primitive in IEEE 1609.4)
+     * 4. Create and store WSA under WSA Identifier. (when time slot 0 comes it will get from DB and sent over the air) - done
+     */ 
 
-//    /** TODO:
-//     * 1. see how the MIB storing should works
-//    */
-// }
+    if(act == add){
+        bool best_available = false;                   // Best Available option is set to `false` in our implementation.
+        enum service_status serv_status = pending;
+        if(IS_NOT_VALID_CHANNEL(sch_id)){
+            sch_id = find_suitable_channel();                   // Run channel assignment algorithm to select a suitable channel
+        }
+        if(IS_NOT_VALID_CHANNEL(wsa_chan_id)){
+            wsa_chan_id = DEFAULT_CCH;
+        }
+        wme_prvtb_add(wsatype, psid, psc, chan_access, best_available, OPERATING_CLASS, sch_id, wsa_chan_id, repeat_rate, ip_service, ipv6_addr,
+            provider_mac_addr, service_port, rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, serv_status, prv_tb);
+        
+        uint8_t wsa_id = 4;
+        int err[1];
+
+        wave_pdu *pdu = create_pdu_buf();
+        struct wsmp_wsa *wsa_metadata = create_wsa_metadata(wsa_id, prv_tb, chan_tb);
+        wsmp_wsa_encode(wsa_metadata, pdu, err, WSMP_STRICT);
+        if(*err) {
+            printf("unable to encode WSA. error: %d", *err);
+            return;
+        }
+        pdu_tb->wsa_store[wsa_id] = pdu;
+    }
+
+    // else if(act == change){}
+    // else if(act == delete){}
+}
+
+// TODO: Need to implement the channel assignment algorithm to pick a good channel for applicatioin service.
+// Need to design algorithm, metadatat etc
+uint8_t find_suitable_channel(){
+    return 172;
+}

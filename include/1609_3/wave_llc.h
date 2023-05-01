@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "../pdu_buf.h"
 
+#include "wsmp.h"
+
 /* TODO: WsmMaxLength and this variable is similary which is maintain under MIB */
 #define MSDU_MAXSIZE 2304  /* in octets */
 
@@ -22,11 +24,6 @@ typedef struct llc_pdu_metadata {
     uint8_t oui[3];
     uint16_t ethertype;
 } llc_pdu_metadata;
-
-/* Time Slot */
-enum time_slot {
-    time_slot0, time_slot1
-};
 
 llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype);
 void print_llc_pdu_metadata(const llc_pdu_metadata *self);

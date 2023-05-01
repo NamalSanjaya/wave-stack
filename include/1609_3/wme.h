@@ -4,6 +4,31 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "../../include/pdu_buf.h"
+
+#define DEFAULT_CCH 178
+// TODO: Remove this when we support multiple operating classess.
+#define OPERATING_CLASS 14
+
+// To check the validity of channel number
+#define IS_NOT_VALID_CHANNEL(elem) \
+    ({ \
+        uint8_t arr[7] = {172, 174, 176, 178, 180, 182, 184}; \
+        bool not_found = true; \
+        for (int i = 0; i < 7; i++) { \
+            if (arr[i] == elem) { \
+                not_found = false; \
+                break; \
+            } \
+        } \
+        not_found; \
+})
+
+/* Time Slot */
+enum time_slot {
+    time_slot0, time_slot1
+};
+
 enum action {
     add, delete, change
 };
@@ -127,6 +152,14 @@ struct wsmp_sii *create_wsa_sii(uint32_t psid, uint8_t chan_index, uint16_t psc_
 struct wsmp_cii *create_wsa_cii(uint8_t op_class, uint8_t chan_no, int8_t tx_pow, uint8_t adapt, uint8_t data_rate, bool use_edac,
     uint8_t *ac_be, uint8_t *ac_bk, uint8_t *ac_vi, uint8_t *ac_vo, uint8_t chan_access);
 
-struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable *provider_serv_tb, ProviderChannelInfoTable *provider_chan_tb) ;
+struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable *provider_serv_tb, ProviderChannelInfoTable *provider_chan_tb);
+
+void wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
+    uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
+    bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
+    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime,
+    ProviderServiceRequestTable *prv_tb, ProviderChannelInfoTable *chan_tb, PduTable *pdu_tb);
+
+uint8_t find_suitable_channel();
 
 #endif /* _WME_H */

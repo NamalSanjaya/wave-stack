@@ -437,11 +437,11 @@ out:
 }
 
 void wsmp_wsa_encode(const struct wsmp_wsa *curs, wave_pdu *pdu, int *err, int mode) {
-     uint8_t buf[WSMP_MAXSIZE];
-     size_t i[1];
+    uint8_t buf[WSMP_MAXSIZE];
+    size_t i[1];
 
-     *i = 0;
-     *err = 0;
+    *i = 0;
+    *err = 0;
 
      if (mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE) {
 	  fprintf(stderr, "ERROR: mode != WSMP_STRICT && mode != WSMP_LAX && mode != WSMP_LOOSE\n");
@@ -454,6 +454,8 @@ void wsmp_wsa_encode(const struct wsmp_wsa *curs, wave_pdu *pdu, int *err, int m
 	  *err = -WSMP_ENOSUPPORT;
 	  goto out;
      }
+	 _s(buf, i, curs->proto_version, WSMP_MAXSIZE, err);
+	 _s(buf, i, curs->wsaType, WSMP_MAXSIZE, err);
 
      uint8_t hoi = 0x00;
 
