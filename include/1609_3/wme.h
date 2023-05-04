@@ -34,7 +34,7 @@ enum action {
 };
 
 enum wsa_type {
-    secured = 1, unsecured = 2
+    secured = 1, unsecured = 2, securedOrUnsecured = 3, any = 4
 };
 
 enum channel_access {
@@ -43,6 +43,14 @@ enum channel_access {
 
 enum service_status{
     pending = 0, satisfied = 1, partiallySatisfied = 2
+};
+
+enum user_request_type {
+    auto_access, no_SCH_access
+};
+
+enum wme_service_confirm {
+    Accepted, RejectedInvalidParameter, RejectedUnspecified
 };
 
 typedef struct ProviderServiceRequestTableEntry {
@@ -111,6 +119,28 @@ typedef struct ProviderChannelInfoTable {
     size_t size;
 } ProviderChannelInfoTable;
 
+typedef struct UserServiceRequestTableEntry {
+    uint16_t UserServiceRequestTableIndex;
+    enum user_request_type  UserServiceRequestType;
+    uint8_t UserServiceRequestProviderServiceIdentifier[8];
+    uint8_t UserServiceRequestProviderServiceContext[32];
+    uint8_t UserServiceRequestPriority;
+    enum wsa_type UserServiceRequestWsaTypes;
+    uint8_t UserServiceRequestSourceMacAddress[6];
+    uint8_t UserServiceRequestAdvertiserIdentifier[32];
+    uint8_t UserServiceRequestOperatingClass;
+    uint8_t UserServiceRequestChannelNumber;
+    uint8_t UserServiceRequestLinkQuality; // data size for link quality need to be decided
+    uint8_t UserServiceRequestImmediateAccess;
+    enum service_status UserServiceStatus;
+} UserServiceRequestTableEntry;
+
+typedef struct UserServiceRequestTable {
+    uint8_t oid[32];
+    UserServiceRequestTableEntry table[4096];
+    size_t size;
+} UserServiceRequestTable;
+
 // WME MIB related methods
 ProviderServiceRequestTableEntry *get_wme_prvtb(size_t index, ProviderServiceRequestTable *self);
 ProviderServiceRequestTableEntry *wme_prvtb_get_by_psid(uint32_t psid, ProviderServiceRequestTable *self);
@@ -137,6 +167,11 @@ uint8_t get_chan_index(uint8_t chan_no, ProviderChannelInfoTable *self);
 void show_wme_chan_info(size_t indx, ProviderChannelInfoTable *self);
 void show_wme_chan_info_entry(ProviderChannelInfoTableEntry *entry);
 
+UserServiceRequestTable *create_wme_user_serv_req_tb();
+void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, uint8_t *psc, uint8_t priority, enum wsa_type wsatype,
+    uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t op_class, uint8_t channel_no, uint8_t link_quality, uint8_t immediate_access, 
+    enum service_status serv_status, UserServiceRequestTable *self);
+
 // WME related methods
 struct wsmp_iex *create_wsa_iex(uint8_t repeat_rate, bool use_loc2d,  uint32_t loc2d_latitude, uint32_t loc2d_longitude, bool use_loc3d,
     uint32_t loc3d_latitude, uint32_t loc3d_longitude, uint32_t loc3d_elevation, uint16_t advert_len, uint8_t *advert_id);
@@ -161,5 +196,9 @@ void wme_provider_service_req(uint16_t local_service_index, enum action act, uin
     ProviderServiceRequestTable *prv_tb, ProviderChannelInfoTable *chan_tb, PduTable *pdu_tb);
 
 uint8_t find_suitable_channel();
+
+void wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint32_t psid, uint8_t *psc,
+    enum wsa_type wsatype, uint8_t channel_id, uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t link_quality, uint8_t immediate_access,
+    UserServiceRequestTable *user_serv_tb);
 
 #endif /* _WME_H */
