@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "../../include/1609_3/wme.h"
+#include "../../include/fmt_error.h"
 
 // get by Provider Table Index
 ProviderServiceRequestTableEntry *get_wme_prvtb(size_t index, ProviderServiceRequestTable *self){
@@ -65,8 +66,7 @@ void wme_prvtb_add(enum wsa_type  wsatype, uint32_t psid, uint8_t *psc, enum cha
 ProviderServiceRequestTable *create_wme_provider_tb(){
     ProviderServiceRequestTable *tb_obj = calloc(1, sizeof(ProviderServiceRequestTable));
     if(tb_obj == NULL){
-        // should be panic
-        return NULL;
+        fmt_panic("Unable to allocate memory to create ProviderServiceRequestTable");
     }
     uint8_t oid[32] = "1.3.111.2.1609.3.4.2.1.4" ; 
     memcpy(tb_obj->oid, oid, 32) ;
@@ -152,8 +152,7 @@ printf(".... Table Entry Info ....\n");
 ProviderChannelInfoTable *create_wme_prv_chan_tb(){
     ProviderChannelInfoTable *tb_obj = calloc(1, sizeof(ProviderChannelInfoTable));
     if(tb_obj == NULL){
-        // should be panic
-        return NULL;
+        fmt_panic("Unable to allocate memory to create ProviderChannelInfoTable");
     }
     uint8_t oid[32] = "1.3.111.2.1609.3.4.2.1.3" ; 
     memcpy(tb_obj->oid, oid, 32) ;
@@ -258,4 +257,46 @@ void show_wme_chan_info_entry(ProviderChannelInfoTableEntry *entry){
     }
 
     printf("------ End --------\n");
+}
+
+// methods for UserServiceRequestTable
+
+UserServiceRequestTable *create_wme_user_serv_req_tb(){
+    UserServiceRequestTable *tb_obj = calloc(1, sizeof(UserServiceRequestTable));
+    if(tb_obj == NULL){
+        fmt_panic("Unable to allocate memory to create UserServiceRequestTable");
+    }
+    uint8_t oid[32] = "1.3.111.2.1609.3.4.2.3.1"; 
+    memcpy(tb_obj->oid, oid, 32) ;
+    tb_obj->size = 0;
+    return tb_obj;
+}
+
+void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, uint8_t *psc, uint8_t priority, enum wsa_type wsatype,
+    uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t op_class, uint8_t channel_no, uint8_t link_quality, uint8_t immediate_access, 
+    enum service_status serv_status, UserServiceRequestTable *self){
+    UserServiceRequestTableEntry *entry = calloc(1, sizeof(UserServiceRequestTableEntry));
+    if(entry == NULL){
+        return;
+    }
+    entry->UserServiceRequestTableIndex = self->size;
+    entry->UserServiceRequestType = req_type;
+    memcpy(entry->UserServiceRequestProviderServiceIdentifier, psid, 8); // TODO: PSID is variable length
+    memcpy(entry->UserServiceRequestProviderServiceContext, psc, 32);
+
+    entry->UserServiceRequestPriority = priority;
+    entry->UserServiceRequestWsaTypes = wsatype;
+    memcpy(entry->UserServiceRequestSourceMacAddress, src_mac_addr, 6);
+
+    memcpy(entry->UserServiceRequestAdvertiserIdentifier, advert_id, 32);
+    entry->UserServiceRequestOperatingClass = op_class;
+    entry->UserServiceRequestChannelNumber = channel_no;
+    entry->UserServiceRequestLinkQuality = link_quality;
+    entry->UserServiceRequestImmediateAccess = immediate_access;
+    entry->UserServiceStatus = serv_status;
+
+    memcpy((self->table) + (self->size), entry, sizeof(UserServiceRequestTableEntry));
+    self->size++;
+
+    free(entry);
 }
