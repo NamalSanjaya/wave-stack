@@ -286,7 +286,7 @@ struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable
     return wsa;
 }
 
-void wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
+enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
     uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
     bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
     uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime,
@@ -304,7 +304,7 @@ void wme_provider_service_req(uint16_t local_service_index, enum action act, uin
         bool best_available = false;                   // Best Available option is set to `false` in our implementation.
         enum service_status serv_status = pending;
         if(IS_NOT_VALID_CHANNEL(sch_id)){
-            sch_id = find_suitable_channel();                   // Run channel assignment algorithm to select a suitable channel
+            sch_id = find_suitable_channel();                   // Assign a suitable channel
         }
         if(IS_NOT_VALID_CHANNEL(wsa_chan_id)){
             wsa_chan_id = DEFAULT_CCH;
@@ -320,17 +320,37 @@ void wme_provider_service_req(uint16_t local_service_index, enum action act, uin
         wsmp_wsa_encode(wsa_metadata, pdu, err, WSMP_STRICT);
         if(*err) {
             printf("unable to encode WSA. error: %d", *err);
-            return;
+            return rejected_unspecified;
         }
         pdu_tb->wsa_store[wsa_id] = pdu;
     }
 
     // else if(act == change){}
     // else if(act == delete){}
+    return Accepted
 }
 
 // TODO: Need to implement the channel assignment algorithm to pick a good channel for applicatioin service.
-// Need to design algorithm, metadatat etc
+// Need to design algorithm, metadata etc
 uint8_t find_suitable_channel(){
     return 172;
+}
+
+enum wme_service_confirm wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint32_t psid, uint8_t *psc,
+    enum wsa_type wsatype, uint8_t channel_id, uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t link_quality, uint8_t immediate_access,
+    UserServiceRequestTable *user_serv_tb){
+    /**
+     * 1. population of a corresponding UserServiceRequestTableEntry in the MIB - done
+     * 2. consideration of the service request in determining channel access assignments
+     * 3. generates a WME-UserService.confirm indicating whether the request is accepted - return value from the function
+     */
+    uint8_t priority = 0;
+    uint8_t op_class = OPERATING_CLASS;
+    enum service_status serv_status = pending;
+    if(act == add){
+        add_wme_user_serv_req_tb(user_req_type, psid, psc, priority, wsatype, src_mac_addr, advert_id, op_class, channel_id, link_quality, 
+        immediate_access, serv_status, user_serv_tb);
+    }
+    // else if(act == delete){}
+    return Accepted;
 }
