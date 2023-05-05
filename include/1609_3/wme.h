@@ -189,7 +189,7 @@ struct wsmp_cii *create_wsa_cii(uint8_t op_class, uint8_t chan_no, int8_t tx_pow
 
 struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable *provider_serv_tb, ProviderChannelInfoTable *provider_chan_tb);
 
-void wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
+enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
     uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
     bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
     uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime,
@@ -197,7 +197,7 @@ void wme_provider_service_req(uint16_t local_service_index, enum action act, uin
 
 uint8_t find_suitable_channel();
 
-void wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint32_t psid, uint8_t *psc,
+enum wme_service_confirm wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint8_t *psid, uint8_t *psc,
     enum wsa_type wsatype, uint8_t channel_id, uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t link_quality, uint8_t immediate_access,
     UserServiceRequestTable *user_serv_tb);
 

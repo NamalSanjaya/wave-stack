@@ -296,8 +296,7 @@ struct wsmp_wsm *gen_wsm_metadata(){
      return create_wsmp_metadata(subtype, tpid, opt_indicator, chat_id, data_rate, tx_power, psid, len, data);
 }
 
-// TODO: wsm_waveshortmsg_req method has been changed. Chnage this method accordingly
-wave_pdu *gen_wsm_waveshortmsg_req(){
+enum confirm_result_code gen_wsm_waveshortmsg_req(wave_pdu *pdu){
      uint8_t info_element_indicator=1, chan_id=172, data_rate=0x0C, chan_load=1, prority = 2;
      int8_t tx_power=0x9E;
      uint64_t wsm_exptime = 1000;
@@ -309,8 +308,9 @@ wave_pdu *gen_wsm_waveshortmsg_req(){
      char *msg = "hello-world";
      if (data==NULL){
           fprintf(stderr, "could not allocate memory\n");
-          return NULL;
+          return rejected_unspecified;
      }
      memcpy(data, msg, len);
-     return wsm_waveshortmsg_req(chan_id, tmslot, data_rate, tx_power, chan_load, info_element_indicator, prority, wsm_exptime, len, data, peer_macaddr, psid);
+     return wsm_waveshortmsg_req(chan_id, tmslot, data_rate, tx_power, chan_load, info_element_indicator, 
+               prority, wsm_exptime, len, data, peer_macaddr, psid, pdu);
 }

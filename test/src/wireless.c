@@ -114,7 +114,8 @@ int main() {
 	     return EXIT_FAILURE;
      }
 
-     wave_pdu *pdu = gen_wsm_waveshortmsg_req();
+     wave_pdu *pdu = create_pdu_buf();
+     gen_wsm_waveshortmsg_req(pdu);
      if (pdu==NULL){
           fprintf(stderr, "Failed to serve the wsm creation request.\n");
 	     return EXIT_FAILURE;
