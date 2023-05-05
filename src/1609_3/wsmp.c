@@ -402,3 +402,4 @@ void wsm_waveshortmsg_ind(){
       * 2. send data to it.
      */
 }
+
