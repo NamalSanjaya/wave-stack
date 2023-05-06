@@ -1,5 +1,11 @@
 CC=gcc
 CFLAGS=-Wall
+
+INSTALL ?= install
+PREFIX ?= /usr
+LIBDIR = $(PREFIX)/lib
+INCLUDEDIR = $(PREFIX)/include
+
 SRC=src/wave_encode.c src/1609_3/wave_llc.c src/pdu_buf.c src/fmt_error.c src/1609_3/wsmp_encode.c src/1609_3/wsmp.c \
 	test/src/test_main.c test/src/test_wsmp.c test/src/wireless.c src/network.c src/1609_3/wsmp_decode.c src/1609_3/wme_mib.c lib/server.c \
 	src/1609_3/wme.c lib/client.c
@@ -11,12 +17,13 @@ OBJS=wave_encode.o wave_llc.o pdu_buf.o fmt_error.o wsmp_encode.o wsmp.o network
 
 # To build libwave_sock shared library
 SOCKSRC=lib/client.c
+SOCKHDR=lib/libwave_sock.h
 SOCKOBJS=lib/bin/obj/libwave_sock.o
 SOCKOS=lib/bin/so/libwave_sock.so
 
 # To run demo examples
 DEMO_APP = app/wsa_ex1.c
-DEMO_LIBS = -Llib/bin/so -lwave_sock -Ilib/
+DEMO_LIBS = -lwave_sock
 DEMO_EXEC = app/bin/exec
 
 buildo: $(SRC) $(HDR)
@@ -51,3 +58,11 @@ gendemo.wsa1:
 
 run.demo.wsa1: 
 	@./$(DEMO_EXEC)
+
+install: $(SOCKOS) $(SOCKHDR)
+	$(INSTALL) -D $(SOCKHDR) $(INCLUDEDIR)/libwave_sock.h
+	$(INSTALL) -D $(SOCKOS) $(LIBDIR)/libwave_sock.so
+
+uninstall:
+	rm $(INCLUDEDIR)/libwave_sock.h
+	rm $(LIBDIR)/libwave_sock.so
