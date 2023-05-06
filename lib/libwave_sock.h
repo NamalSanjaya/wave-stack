@@ -2,9 +2,7 @@
 #define _WAVE_SOCK_H
 
 #include <stdint.h>
-
-#include "../include/pdu_buf.h"
-#include "../include/1609_3/wme.h"
+#include <stdbool.h>
 
 // primitive identifiers
 #define WSM_WaveShortMessage_request 1
@@ -42,17 +40,27 @@
 
 #define DATA_MAXSIZE 2304
 
-// tempory path
-#define SCKFILE "<path-to-socket-file>"
+enum action {
+    add, delete, change
+};
+
+enum wsa_type {
+    secured = 1, unsecured = 2, securedOrUnsecured = 3, any = 4
+};
+
+enum channel_access {
+    continuous = 0, alternatingTimeslot0Only = 1, alternatingTimeslot1Only = 2
+};
 
 typedef struct app_ProviderServiceReqEntry{
+    uint8_t id;
     enum action act; 
     uint8_t dest_mac_addr[6]; 
     enum wsa_type wsatype; 
     uint32_t psid; 
     uint8_t psc[32];
     uint8_t psc_len; 
-    enum time_slot chan_access; 
+    enum channel_access chan_access; 
     bool ip_service; 
     uint8_t ipv6_addr[16]; 
     uint16_t service_port; 
@@ -68,11 +76,11 @@ int8_t _put_uint16(uint8_t *buf, size_t *i, const uint16_t v);
 int8_t _put_uint32(uint8_t *buf, size_t *i, const uint32_t v);
 void print_app_ProviderServiceReqEntry(app_ProviderServiceReqEntry *psre);
 
-int send_data(uint8_t *src, size_t size);
+int send_data(uint8_t *src, size_t size, const char *sckfile);
 int init_socket(const char *sckfile);
 
 int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype, uint32_t psid, 
-    uint8_t *psc, uint8_t psc_len, enum time_slot chan_access, bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, int8_t rcpi_threshold, 
-    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval);
+    uint8_t *psc, uint8_t psc_len, enum channel_access chan_access, bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, int8_t rcpi_threshold, 
+    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, const char *sckfile);
 
 #endif /* _WAVE_SOCK_H */
