@@ -3,5 +3,7 @@
 *.out
 *.txt
 test/bin
+lib/bin
 executable
 servexec
+app/bin

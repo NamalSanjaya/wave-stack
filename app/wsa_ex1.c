@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "../../lib/libwave_sock.h"
+#include <libwave_sock.h>
 
-#define SCKFILE "<path-to-socket-file>"
+#define SCKFILE "<path-to-sockfile>"
 
 int main(){
 
@@ -26,8 +26,8 @@ int main(){
 
     if (st<0){
         printf("something went wrong...\n");
-        exit(1);
+        return 1;
     }
+    printf("--done--\n");
     return 0;
 }
-
