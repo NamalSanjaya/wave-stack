@@ -3,7 +3,7 @@
 
 #include <libwave_sock.h>
 
-#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
+#define SCKFILE "<path-to-sockfile>"
 
 int main(){
 
@@ -21,13 +21,13 @@ int main(){
     uint8_t wsa_count_threshold = 8;
     uint8_t wsa_count_thd_interval = 5;
 
-    // int8_t st = app_provider_service_req(act, dest_mac_addr, wsatype, psid, psc, psc_len, chan_access, ip_service, ipv6_addr, service_port, 
-    //     rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, SCKFILE);
+    int8_t st = app_provider_service_req(act, dest_mac_addr, wsatype, psid, psc, psc_len, chan_access, ip_service, ipv6_addr, service_port, 
+        rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, SCKFILE);
 
-    // if (st<0){
-    //     printf("something went wrong...\n");
-    //     return 1;
-    // }
+    if (st<0){
+        printf("something went wrong...\n");
+        return 1;
+    }
     printf("--done--\n");
     return 0;
 }
