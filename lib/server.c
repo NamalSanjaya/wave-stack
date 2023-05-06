@@ -5,9 +5,9 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include "../include/1609_3/wsmp.h"
-#include "../test/include/test_wsmp.h"
-#include "wave_sock.h"
+#include "libwave_sock.h"
+
+#define SCKFILE "<path-to-sockfile>"
 
 int main() {
     int server_fd, client_fd, len;

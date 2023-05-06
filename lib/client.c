@@ -5,9 +5,9 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-#include "../include/1609_3/wme.h"
-#include "wave_sock.h"
+#include "libwave_sock.h"
 
 void print_app_ProviderServiceReqEntry(app_ProviderServiceReqEntry *psre){
     printf("\n-----BEGIN APP ProviderServiceReqEntry-------\n");
@@ -85,8 +85,8 @@ int8_t _put_uint8_n(uint8_t *buf, size_t *i, size_t n, const uint8_t *v) {
     return 0;
 }
 
-int send_data(uint8_t *src, size_t size){
-    const char* socket_name = SCKFILE;
+int send_data(uint8_t *src, size_t size, const char *sckfile){
+    const char* socket_name = sckfile;
     int socket_fd;
     struct  sockaddr_un name;
 
@@ -119,8 +119,8 @@ int init_socket(const char *sckfile){
 }
 
 int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype, uint32_t psid, 
-    uint8_t *psc, uint8_t psc_len, enum time_slot chan_access, bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, int8_t rcpi_threshold, 
-    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval){
+    uint8_t *psc, uint8_t psc_len, enum channel_access chan_access, bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, int8_t rcpi_threshold, 
+    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, const char *sckfile){
     /**
      * 1. do the encoding here.
      * 2. send_data()
@@ -129,6 +129,7 @@ int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum ws
     if(psre == NULL){
         return -1;
     }
+    psre->id = WME_ProviderService_request;
     psre->act = act;
     memcpy(psre->dest_mac_addr, dest_mac_addr, 6);
     psre->wsatype = wsatype;
@@ -143,7 +144,7 @@ int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum ws
     psre->wsa_count_threshold = wsa_count_threshold;
     psre->wsa_count_thd_interval = wsa_count_thd_interval;
 
-    int socket_fd = init_socket(SCKFILE);
+    int socket_fd = init_socket(sckfile);
 
     if (send(socket_fd, psre, sizeof(*psre), 0) == -1) {
         printf("went wrong..\n");
