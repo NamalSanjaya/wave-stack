@@ -53,12 +53,6 @@ libClean:
 libSock.so: $(SOCKOBJS)
 	$(CC) -shared -o $(SOCKOS) $(SOCKOBJS)
 
-gendemo.wsa1:
-	$(CC) -o $(DEMO_EXEC) $(DEMO_APP) $(DEMO_LIBS)
-
-run.demo.wsa1: 
-	@./$(DEMO_EXEC)
-
 install: $(SOCKOS) $(SOCKHDR)
 	$(INSTALL) -D $(SOCKHDR) $(INCLUDEDIR)/libwave_sock.h
 	$(INSTALL) -D $(SOCKOS) $(LIBDIR)/libwave_sock.so
@@ -66,3 +60,21 @@ install: $(SOCKOS) $(SOCKHDR)
 uninstall:
 	rm $(INCLUDEDIR)/libwave_sock.h
 	rm $(LIBDIR)/libwave_sock.so
+
+# Run app/wsa_ex1.c demo
+gendemo.wsa1:
+	$(CC) -o $(DEMO_EXEC) $(DEMO_APP) $(DEMO_LIBS)
+
+run.demo.wsa1: 
+	@./$(DEMO_EXEC)
+
+# Related to stack main function
+main.o:
+	gcc -c src/controller.c -o src/ctrl.o
+	gcc -c src/main.c -o src/main.o
+
+main.e:
+	gcc -o main.out src/ctrl.o src/main.o lib/bin/obj/libwave_sock.o -lpthread
+
+mainClean:
+	rm -rf src/*.out src/*.o main.out

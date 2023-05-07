@@ -1,13 +1,58 @@
 #include <stdio.h>
+#include <pthread.h>
+#include <time.h>
+#include <unistd.h> 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <unistd.h>
 
-#include "libwave_sock.h"
+#include "../include/controller.h"
+#include "../lib/libwave_sock.h"
 
-#define SCKFILE "<path-to-sockfile>"
+int slot = 0;
+
+pthread_mutex_t mutex_slot;
+pthread_cond_t chan_timer;
+
+void slot_mutex_init(){
+    pthread_mutex_init(&mutex_slot, NULL);
+}
+
+void timer_cond_init(){
+    pthread_cond_init(&chan_timer, NULL);
+}
+
+void slot_mutex_destroy(){
+    pthread_mutex_destroy(&mutex_slot);
+}
+
+void timer_cond_destroy(){
+    pthread_cond_destroy(&chan_timer);
+}
+
+void *timer(){
+    while (1){
+        usleep(CH_INTERVAL);
+        pthread_cond_broadcast(&chan_timer);
+    }
+}
+
+void *scheduler(){
+    pthread_mutex_lock(&mutex_slot);
+    while(1) {
+        if(slot == 0){
+            printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
+        } 
+        else if(slot == 1) {
+            printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
+        }
+        slot = slot == 0 ? 1 : 0;
+        pthread_cond_wait(&chan_timer, &mutex_slot);
+    }
+    pthread_mutex_unlock(&mutex_slot);
+}
 
 int server_init(const char *sckfile){
     int server_fd;
@@ -30,7 +75,7 @@ int server_init(const char *sckfile){
 }
 
 void server_listen(int server_fd){
-    int len;
+    int client_fd, len;
     struct sockaddr_un client_addr;
     socklen_t client_addr_len;
     app_ProviderServiceReqEntry psre;
