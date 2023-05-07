@@ -2,7 +2,7 @@
 #define _CONTROLLER_H
 
 #define CH_INTERVAL 46e3  // 46ms
-#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
+#define SCKFILE "<path-to-sckfile>"
 
 void slot_mutex_init();
 void timer_cond_init();
