@@ -69,6 +69,12 @@ typedef struct app_ProviderServiceReqEntry{
     uint8_t wsa_count_thd_interval;
 } app_ProviderServiceReqEntry;
 
+typedef struct local_req{
+    int id;
+    app_ProviderServiceReqEntry psre;
+    // Add other app_<reqEntryTypes>
+
+} local_req_t;
 
 int8_t _put_uint8(uint8_t *buf, size_t *i, const uint8_t v);
 int8_t _put_uint8_n(uint8_t *buf, size_t *i, size_t n, const uint8_t *v);

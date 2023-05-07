@@ -125,6 +125,7 @@ int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum ws
      * 1. do the encoding here.
      * 2. send_data()
      */
+    local_req_t *req = calloc(1, sizeof(local_req_t));
     app_ProviderServiceReqEntry *psre = calloc(1, sizeof(app_ProviderServiceReqEntry));
     if(psre == NULL){
         return -1;
@@ -144,14 +145,18 @@ int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum ws
     psre->wsa_count_threshold = wsa_count_threshold;
     psre->wsa_count_thd_interval = wsa_count_thd_interval;
 
+    req->id = WME_ProviderService_request;
+    req->psre = *psre;
+
     int socket_fd = init_socket(sckfile);
 
-    if (send(socket_fd, psre, sizeof(*psre), 0) == -1) {
+    if (send(socket_fd, req, sizeof(*req), 0) == -1) {
         printf("went wrong..\n");
         return -1;
     }
     // Close the socket
     close(socket_fd);
     free(psre);
+    free(req);
     return 0;
 }

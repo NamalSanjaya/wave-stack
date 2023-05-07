@@ -8,8 +8,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#include "../include/controller.h"
 #include "../lib/libwave_sock.h"
+#include "../include/controller.h"
 
 int slot = 0;
 
@@ -78,7 +78,7 @@ void server_listen(int server_fd){
     int client_fd, len;
     struct sockaddr_un client_addr;
     socklen_t client_addr_len;
-    app_ProviderServiceReqEntry psre;
+    local_req_t req;
 
     while(1){
         // Accept a connection
@@ -89,14 +89,14 @@ void server_listen(int server_fd){
             continue;
         }
 
-        // Receive the employee struct from the client
-        len = recv(client_fd, &psre, sizeof(psre), 0);
+        len = recv(client_fd, &req, sizeof(req), 0);
         if (len == -1) {
             printf("receiving error...\n");
             continue;
         }
-        // Print the received employee struct
-        print_app_ProviderServiceReqEntry(&psre);
+        
+        printf("Id: %d\n", req.id);
+        print_app_ProviderServiceReqEntry(&req.psre);
         close(client_fd);
     }
 }

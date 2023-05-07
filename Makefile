@@ -78,3 +78,7 @@ main.e:
 
 mainClean:
 	rm -rf src/*.out src/*.o main.out
+	rm -rf test/bin/sckfile
+
+run.main:
+	@./main.out
