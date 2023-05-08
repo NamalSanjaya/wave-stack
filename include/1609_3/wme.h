@@ -141,6 +141,41 @@ typedef struct UserServiceRequestTable {
     size_t size;
 } UserServiceRequestTable;
 
+typedef struct mib {
+    PduTable *pdutb;
+    ProviderServiceRequestTable *psrtb;
+    ProviderChannelInfoTable *pcitb;
+    UserServiceRequestTable *usrtb;
+} mib_t;
+
+// from libwave_sock.h
+typedef struct app_ProviderServiceReqEntry{
+    uint8_t id;
+    enum action act; 
+    uint8_t dest_mac_addr[6]; 
+    enum wsa_type wsatype; 
+    uint32_t psid; 
+    uint8_t psc[32];
+    uint8_t psc_len; 
+    enum channel_access chan_access; 
+    bool ip_service; 
+    uint8_t ipv6_addr[16]; 
+    uint16_t service_port; 
+    int8_t rcpi_threshold; 
+    uint8_t wsa_count_threshold;
+    uint8_t wsa_count_thd_interval;
+} app_ProviderServiceReqEntry;
+
+typedef struct local_req{
+    int id;
+    app_ProviderServiceReqEntry psre;
+    // Add other app_<reqEntryTypes>
+
+} local_req_t;
+
+
+mib_t *create_mib();
+
 // WME MIB related methods
 ProviderServiceRequestTableEntry *get_wme_prvtb(size_t index, ProviderServiceRequestTable *self);
 ProviderServiceRequestTableEntry *wme_prvtb_get_by_psid(uint32_t psid, ProviderServiceRequestTable *self);

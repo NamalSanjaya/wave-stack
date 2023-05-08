@@ -9,7 +9,7 @@
 
 #define SCKFILE "<path-to-sockfile>"
 
-int server_init(const char *sckfile){
+int server_init_temp(const char *sckfile){
     int server_fd;
     struct sockaddr_un server_addr;
 
@@ -29,7 +29,7 @@ int server_init(const char *sckfile){
     return server_fd;
 }
 
-void server_listen(int server_fd){
+void server_listen_temp(int server_fd){
     int len;
     struct sockaddr_un client_addr;
     socklen_t client_addr_len;
