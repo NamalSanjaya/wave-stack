@@ -1,6 +1,8 @@
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
 
+#include "./1609_3/wme.h"
+
 #define CH_INTERVAL 46e3  // 46ms
 #define SCKFILE "<path-to-sckfile>"
 
@@ -10,9 +12,12 @@ void slot_mutex_destroy();
 void timer_cond_destroy();
 
 void *timer();
-void *scheduler();
+void *scheduler(void *arg);
 
 int server_init(const char *sckfile);
-void server_listen(int server_fd);
+void server_listen(int server_fd, mib_t *mib_db);
+
+void hand_over_stack(local_req_t *req, mib_t *mib_db);
+void broadcast_wsa(mib_t *mib_db);
 
 #endif /* _CONTROLLER_H */
