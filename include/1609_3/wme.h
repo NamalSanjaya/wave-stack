@@ -192,8 +192,7 @@ struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable
 enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
     uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
     bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
-    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime,
-    ProviderServiceRequestTable *prv_tb, ProviderChannelInfoTable *chan_tb, PduTable *pdu_tb);
+    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime, mib_t *mib_db);
 
 uint8_t find_suitable_channel();
 

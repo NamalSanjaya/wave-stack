@@ -6,6 +6,15 @@
 #include "../../include/1609_3/wme.h"
 #include "../../include/fmt_error.h"
 
+mib_t *create_mib(){
+    mib_t *mib_db = calloc(1, sizeof(mib_t));
+    mib_db->pdutb = create_pduTable();
+    mib_db->psrtb = create_wme_provider_tb();
+    mib_db->pcitb = create_wme_prv_chan_tb();
+    mib_db->usrtb = create_wme_user_serv_req_tb();
+    return mib_db;
+}
+
 // get by Provider Table Index
 ProviderServiceRequestTableEntry *get_wme_prvtb(size_t index, ProviderServiceRequestTable *self){
     if(self->size <= index){
