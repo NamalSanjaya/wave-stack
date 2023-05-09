@@ -11,9 +11,6 @@
 #include "../include/controller.h"
 #include "../include/1609_3/wme.h"
 #include "../include/pdu_buf.h"
-// just for testing
-#include "../include/1609_3/wsmp_decode.h"
-#include "../test/include/test_wsmp.h"
 
 int slot = 0;
 
@@ -127,18 +124,18 @@ void hand_over_stack(local_req_t *req, mib_t *mib_db){
         wme_provider_service_req(local_service_index, psre.act, dest_mac_addr, psre.wsatype, psre.psid, psre.psc, sch_id,
             DEFAULT_CCH, psre.chan_access, repeat_rate, psre.ip_service, psre.ipv6_addr, psre.service_port, provider_mac_addr,
             psre.rcpi_threshold, psre.wsa_count_threshold, psre.wsa_count_thd_interval, info_elements_indicator, sign_lifetime, mib_db);
-        printf("--> one psre hand overed");
     }
 }
 
 void broadcast_wsa(mib_t *mib_db){
     uint8_t wsa_id = 4;
     int err[1];
-    wave_pdu *pdu = get_pdu(wsa_id, mib_db->pdutb);
-    if(pdu == NULL){
+    wave_pdu *wsa = get_pdu(wsa_id, mib_db->pdutb);
+    if(wsa == NULL){
         return;
     }
-    struct wsmp_wsa *decoded_wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
-    print_wsa(decoded_wsa);
-    free(decoded_wsa);
+    uint32_t psid = 1;     // TODO: Need to correct
+    uint8_t peer_mac_addr[6] = {255, 255, 255, 255, 255, 255};
+    wave_pdu *pdu = create_pdu_buf();   // TODO: check right place to free the pdu memory
+    wsm_waveshortmsg_req(0, time_slot0, 0, 0, 0, 0, 0, 0, wsa->offset, wsa->current, peer_mac_addr, psid, pdu);
 }
