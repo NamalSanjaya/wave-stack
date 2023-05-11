@@ -12,6 +12,7 @@ typedef struct wave_pdu {
     size_t offset; // offset from lsb
 } wave_pdu;
 
+// To store WSA msgs
 typedef struct PduTable{
     wave_pdu **wsa_store;
 } PduTable;

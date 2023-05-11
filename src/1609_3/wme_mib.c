@@ -12,6 +12,7 @@ mib_t *create_mib(){
     mib_db->psrtb = create_wme_provider_tb();
     mib_db->pcitb = create_wme_prv_chan_tb();
     mib_db->usrtb = create_wme_user_serv_req_tb();
+    mib_db->wrtb  = create_wsm_req_tb();
     return mib_db;
 }
 
@@ -308,4 +309,63 @@ void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, u
     self->size++;
 
     free(entry);
+}
+
+// methods for Requested WSMs
+
+WSM_ReqTable_t *create_wsm_req_tb(){
+    WSM_ReqTable_t *tb_obj = calloc(1, sizeof(WSM_ReqTable_t));
+    if(tb_obj == NULL) fmt_panic("Unable to allocate memory to create WSM_ReqTable");
+    
+    tb_obj->filled_index = -1;
+    tb_obj->cur_index = 0;
+    tb_obj->size = 0;
+    return tb_obj;
+}
+
+void add_wsm_req_tb(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, uint8_t info_elem_indicator, 
+    uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid, WSM_ReqTable_t *self){
+    WSM_Req_t *entry = calloc(1, sizeof(WSM_Req_t));
+    if(entry == NULL) return;
+
+    entry->chan_id = chan_id;
+    entry->timeslot = timeslot;
+    entry->data_rate = data_rate;
+    entry->tx_power = tx_power;
+    entry->channel_load = channel_load;
+    entry->info_elem_indicator = info_elem_indicator;
+    entry->prority = prority;
+    entry->wsm_expire_time = wsm_expire_time;
+    entry->len = len;
+    memcpy(entry->data, data, len);
+    memcpy(entry->peer_mac_addr, peer_mac_addr, 6);
+    entry->psid = psid;
+
+    if(self->size >= MAXWSMREQS){
+        if(self->cur_index > self->filled_index){
+            self->filled_index++;
+            memcpy((self->table) + (self->filled_index), entry, sizeof(WSM_Req_t));
+            self->size++;
+        } else {
+            fmt_error(WAVE_WARN , "Failed to insert WSM request");
+        }
+        free(entry);
+        return;
+    } 
+
+    self->filled_index++;
+    memcpy((self->table) + (self->filled_index), entry, sizeof(WSM_Req_t));
+    self->size++;
+    free(entry);
+}
+
+WSM_Req_t get_nxt_wsm_req(WSM_ReqTable_t *self, int *err){
+    WSM_Req_t wsmr;
+    *err = 1;
+    if (self->size == 0)return wsmr;
+
+    self->cur_index++;
+    self->size--;
+    *err = 0;
+    return (self->table)[(self->cur_index) - 1];
 }
