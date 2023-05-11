@@ -7,7 +7,7 @@ LIBDIR = $(PREFIX)/lib
 INCLUDEDIR = $(PREFIX)/include
 
 SRC=src/wave_encode.c src/1609_3/wave_llc.c src/pdu_buf.c src/fmt_error.c src/1609_3/wsmp_encode.c src/1609_3/wsmp.c \
-	test/src/test_main.c test/src/test_wsmp.c test/src/wireless.c src/network.c src/1609_3/wsmp_decode.c src/1609_3/wme_mib.c src/controller.c \
+	test/src/test_main.c test/src/test_wsmp.c src/network.c src/1609_3/wsmp_decode.c src/1609_3/wme_mib.c src/controller.c \
 	src/1609_3/wme.c lib/client.c src/main.c
 
 HDR=include/wave_encode.h include/1609_3/wave_llc.h include/pdu_buf.h include/fmt_error.h include/1609_3/wsmp.h \
@@ -35,7 +35,7 @@ builde: $(OBJS)
 	$(CC) $(CFLAGS) -o executable $(OBJS) -lpcap
 
 clean:
-	rm -rf *.o *.out executable servexec
+	rm -rf *.o *.out executable servexec test/bin/sckfile
 
 ## for packet capturing
 sendcapture:
