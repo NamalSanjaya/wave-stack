@@ -39,6 +39,7 @@
 #define MA_UNITDATAX 52
 
 #define DATA_MAXSIZE 2304
+#define WSMDATAMAXSIZE 2048       // TODO: Need to check the exact value
 
 enum action {
     add, delete, change
@@ -50,6 +51,10 @@ enum wsa_type {
 
 enum channel_access {
     continuous = 0, alternatingTimeslot0Only = 1, alternatingTimeslot1Only = 2
+};
+
+enum time_slot {
+    time_slot0, time_slot1
 };
 
 typedef struct app_ProviderServiceReqEntry{
@@ -69,9 +74,25 @@ typedef struct app_ProviderServiceReqEntry{
     uint8_t wsa_count_thd_interval;
 } app_ProviderServiceReqEntry;
 
+typedef struct app_WSM_Req {
+    uint8_t chan_id; 
+    enum time_slot timeslot; 
+    uint8_t data_rate; 
+    int8_t tx_power; 
+    uint8_t channel_load; 
+    uint8_t info_elem_indicator; 
+    uint8_t prority; 
+    uint64_t wsm_expire_time; 
+    uint16_t len; 
+    uint8_t data[WSMDATAMAXSIZE]; 
+    uint8_t peer_mac_addr[6]; 
+    uint32_t psid;
+} app_WSM_Req_t;
+
 typedef struct local_req{
     int id;
     app_ProviderServiceReqEntry psre;
+    app_WSM_Req_t wsmr;
     // Add other app_<reqEntryTypes>
 
 } local_req_t;
@@ -88,5 +109,8 @@ int init_socket(const char *sckfile);
 int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype, uint32_t psid, 
     uint8_t *psc, uint8_t psc_len, enum channel_access chan_access, bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, int8_t rcpi_threshold, 
     uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, const char *sckfile);
+
+int8_t app_wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, uint8_t info_elem_indicator, 
+    uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid, const char *sckfile);
 
 #endif /* _WAVE_SOCK_H */
