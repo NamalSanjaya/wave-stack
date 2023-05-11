@@ -80,7 +80,7 @@ int alloc_tun(char *dev) {
 
 void write_tun(wave_pdu *pdu){
     int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ALL));
-    int ifindex = 4;  // tap interface index
+    int ifindex = 4;  // tun interface index
 
     struct sockaddr_ll SendSockAddr;
     SendSockAddr.sll_family   = AF_PACKET;
@@ -94,7 +94,7 @@ void write_tun(wave_pdu *pdu){
     if(total < 0) {
         fmt_error(WAVE_WARN, "Failed to write data to tap interface.");
     }
-    printf("Sent : %ld\n", total);
+    printf("Send to Tun: %ld\n", total);
     
     close(sockfd);
     free_pbuf(pdu);

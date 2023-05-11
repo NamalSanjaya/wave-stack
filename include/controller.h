@@ -3,7 +3,7 @@
 
 #include "./1609_3/wme.h"
 
-#define CH_INTERVAL 46e3  // 46ms
+#define CH_INTERVAL 3e6  // 46ms
 #define SCKFILE "<path-to-sckfile>"
 
 void slot_mutex_init();
@@ -19,5 +19,6 @@ void server_listen(int server_fd, mib_t *mib_db);
 
 void hand_over_stack(local_req_t *req, mib_t *mib_db);
 void broadcast_wsa(mib_t *mib_db);
+void send_wsm(WSM_ReqTable_t *wsm_tb);
 
 #endif /* _CONTROLLER_H */

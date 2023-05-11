@@ -11,6 +11,7 @@
 #include "../include/controller.h"
 #include "../include/1609_3/wme.h"
 #include "../include/pdu_buf.h"
+#include "../include/1609_3/wsmp.h"
 
 int slot = 0;
 
@@ -46,17 +47,26 @@ void *scheduler(void *arg){
     while(1) {
         if(slot == 0){
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            /** Need a function to perform following tasks.(Tx part)
-             * 1. loop over and check whether 
-             *  a) Encoded/stored WSA is there?
-             *  b) is that one changed(due to update in ProviderServiceRequestTable)
-             *  c) Do we need to create new WSA and store in PDU Table
-             */
             broadcast_wsa(mib_db);
-
+            /**
+             * --------  Monitoring WSA ----------
+             * UserServiceRequest Table has application services that are interested by the device Higher layers.
+             * So while monitoring, if we get a match, that need to be informed to respective Higher layer.
+             * WSMServiceRequest is issued to inform WME about app-service match.
+             * 
+            */
         } 
         else if(slot == 1) {
             printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
+            /**
+             * -------- Send Actual WSM --------
+             * WSA has required information about WSM.
+             * So, during time slot 1, switch to some channel and can send the actual WSM data.
+             * In the actual sending data from MIB or internal data strcture, we will send the oldest request and discard 
+             * its content and all other its data. 
+             * 
+            */
+           send_wsm(mib_db->wrtb);
         }
         slot = slot == 0 ? 1 : 0;
         pthread_cond_wait(&chan_timer, &mutex_slot);
@@ -115,9 +125,16 @@ void hand_over_stack(local_req_t *req, mib_t *mib_db){
     uint8_t dest_mac_addr[6] = {255, 255, 255, 255, 255, 255}; // Brodcast address
     uint8_t sch_id = 0;   // Let the stack to select a channel
     uint8_t repeat_rate = 10;  // TODO: Need to be calculated
-    uint8_t provider_mac_addr[6] = {11,12,13,14,15,16};   // TODO: put right device MAC address
+    uint8_t provider_mac_addr[6] = {11,12,13,14,15,16};   // TODO: Put right device MAC address
     uint8_t info_elements_indicator = 0;
     uint16_t sign_lifetime = 0;
+
+    if(req->id == 1){
+        // Store the WSM related data in WSM_Req_t
+        app_WSM_Req_t wsmr = req->wsmr;
+        add_wsm_req_tb(wsmr.chan_id, wsmr.timeslot, wsmr.data_rate, wsmr.tx_power, wsmr.channel_load, wsmr.info_elem_indicator, wsmr.prority, wsmr.wsm_expire_time,
+            wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid, mib_db->wrtb);
+    }
 
     if(req->id == 11){
         app_ProviderServiceReqEntry psre = req->psre;
@@ -136,6 +153,13 @@ void broadcast_wsa(mib_t *mib_db){
     }
     uint32_t psid = 1;     // TODO: Need to correct
     uint8_t peer_mac_addr[6] = {255, 255, 255, 255, 255, 255};
-    wave_pdu *pdu = create_pdu_buf();   // TODO: check right place to free the pdu memory
-    wsm_waveshortmsg_req(0, time_slot0, 0, 0, 0, 0, 0, 0, wsa->offset, wsa->current, peer_mac_addr, psid, pdu);
+    wsm_waveshortmsg_req(0, time_slot0, 0, 0, 0, 0, 0, 0, wsa->offset, wsa->current, peer_mac_addr, psid);
+}
+
+void send_wsm(WSM_ReqTable_t *wsm_tb){
+    int err[1];
+    WSM_Req_t wsmr = get_nxt_wsm_req(wsm_tb, err);
+    if(*err) return ;
+    wsm_waveshortmsg_req(wsmr.chan_id, wsmr.timeslot, wsmr.data_rate, wsmr.tx_power, wsmr.channel_load, wsmr.info_elem_indicator, wsmr.prority, wsmr.wsm_expire_time,
+        wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid);
 }
