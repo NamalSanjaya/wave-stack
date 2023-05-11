@@ -121,14 +121,10 @@ int init_socket(const char *sckfile){
 int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype, uint32_t psid, 
     uint8_t *psc, uint8_t psc_len, enum channel_access chan_access, bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, int8_t rcpi_threshold, 
     uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, const char *sckfile){
-    /**
-     * 1. do the encoding here.
-     * 2. send_data()
-     */
+    local_req_t *req = calloc(1, sizeof(local_req_t));
     app_ProviderServiceReqEntry *psre = calloc(1, sizeof(app_ProviderServiceReqEntry));
-    if(psre == NULL){
-        return -1;
-    }
+    if(psre == NULL || req == NULL) return -1;
+
     psre->id = WME_ProviderService_request;
     psre->act = act;
     memcpy(psre->dest_mac_addr, dest_mac_addr, 6);
@@ -144,14 +140,54 @@ int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum ws
     psre->wsa_count_threshold = wsa_count_threshold;
     psre->wsa_count_thd_interval = wsa_count_thd_interval;
 
+    req->id = WME_ProviderService_request;
+    req->psre = *psre;
+
     int socket_fd = init_socket(sckfile);
 
-    if (send(socket_fd, psre, sizeof(*psre), 0) == -1) {
+    if (send(socket_fd, req, sizeof(*req), 0) == -1) {
         printf("went wrong..\n");
         return -1;
     }
     // Close the socket
     close(socket_fd);
     free(psre);
+    free(req);
+    return 0;
+}
+
+int8_t app_wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, uint8_t info_elem_indicator, 
+    uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid, const char *sckfile){
+    local_req_t *req = calloc(1, sizeof(local_req_t));
+    app_WSM_Req_t *wsmr = calloc(1, sizeof(app_WSM_Req_t));
+    if(wsmr == NULL || req == NULL) return -1;
+
+    wsmr->chan_id = chan_id;
+    wsmr->timeslot = timeslot;
+    wsmr->data_rate = data_rate;
+    wsmr->tx_power = tx_power;
+    wsmr->channel_load = channel_load;
+    wsmr->info_elem_indicator = info_elem_indicator;
+    wsmr->prority = prority;
+    wsmr->wsm_expire_time = wsm_expire_time;
+    wsmr->len = len;
+    memcpy(wsmr->data, data, len);
+    memcpy(wsmr->peer_mac_addr, peer_mac_addr, 6);
+    wsmr->psid = psid;
+
+    req->id = WSM_WaveShortMessage_request;
+    req->wsmr = *wsmr;
+
+    int socket_fd = init_socket(sckfile);
+    ssize_t total = send(socket_fd, req, sizeof(*req), 0);
+    if (total == -1) {
+        printf("went wrong..\n");
+        return -1;
+    }
+    printf("sent to stack: %ld\n", total);
+    // Close the socket
+    close(socket_fd);
+    free(wsmr);
+    free(req);
     return 0;
 }

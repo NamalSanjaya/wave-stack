@@ -178,16 +178,14 @@ void test_provider_service_req(){
     uint8_t wsa_count_thd_interval = 5;
     uint8_t info_elements_indicator = 0;
     uint16_t sign_lifetime = 0;
-    ProviderServiceRequestTable *pr_tb = exec_test_provider_tb();
-    ProviderChannelInfoTable *chan_info_tb = exec_test_channelInfo_tb();
-    PduTable *pdu_tb = create_pduTable();
+    mib_t *mib_db = create_mib();
 
     wme_provider_service_req(local_service_index, act, dest_mac_addr, wsatype, psid, psc, sch_id, wsa_chan_id, chan_access, 
         repeat_rate, ip_service, ipv6_addr, service_port, provider_mac_addr, rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, 
-        info_elements_indicator, sign_lifetime, pr_tb, chan_info_tb, pdu_tb);
+        info_elements_indicator, sign_lifetime, mib_db);
     
     int err[1];
-    wave_pdu *pdu = get_pdu(4, pdu_tb);
+    wave_pdu *pdu = get_pdu(4, mib_db->pdutb);
     struct wsmp_wsa *decoded_wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
     print_wsa(decoded_wsa);
 

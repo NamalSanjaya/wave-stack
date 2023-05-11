@@ -8,8 +8,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/if_tun.h>
+#include <sys/socket.h>
+#include <net/ethernet.h>
+#include <linux/if_packet.h>
+
 #include "../include/network.h"
 #include "../include/fmt_error.h"
+#include "../include/pdu_buf.h"
+
 
 uint8_t *get_mac_addr(char *device){
     struct ifreq ifr;
@@ -70,4 +76,26 @@ int alloc_tun(char *dev) {
         return err;
     }
     return fd;
+}
+
+void write_tun(wave_pdu *pdu){
+    int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ALL));
+    int ifindex = 4;  // tun interface index
+
+    struct sockaddr_ll SendSockAddr;
+    SendSockAddr.sll_family   = AF_PACKET;
+    SendSockAddr.sll_halen    = ETH_ALEN;
+    SendSockAddr.sll_ifindex  = ifindex;
+    SendSockAddr.sll_protocol = htons(ETH_P_ALL);
+    SendSockAddr.sll_hatype   = 0;
+    SendSockAddr.sll_pkttype  = 0;
+
+    ssize_t total =  sendto(sockfd, pdu->current, pdu->offset, 0, (struct sockaddr *) &SendSockAddr, sizeof(struct sockaddr_ll));
+    if(total < 0) {
+        fmt_error(WAVE_WARN, "Failed to write data to tap interface.");
+    }
+    printf("Send to Tun: %ld\n", total);
+    
+    close(sockfd);
+    free_pbuf(pdu);
 }

@@ -7,13 +7,14 @@ LIBDIR = $(PREFIX)/lib
 INCLUDEDIR = $(PREFIX)/include
 
 SRC=src/wave_encode.c src/1609_3/wave_llc.c src/pdu_buf.c src/fmt_error.c src/1609_3/wsmp_encode.c src/1609_3/wsmp.c \
-	test/src/test_main.c test/src/test_wsmp.c test/src/wireless.c src/network.c src/1609_3/wsmp_decode.c src/1609_3/wme_mib.c lib/server.c \
-	src/1609_3/wme.c lib/client.c
+	test/src/test_main.c test/src/test_wsmp.c src/network.c src/1609_3/wsmp_decode.c src/1609_3/wme_mib.c src/controller.c \
+	src/1609_3/wme.c lib/client.c src/main.c
 
 HDR=include/wave_encode.h include/1609_3/wave_llc.h include/pdu_buf.h include/fmt_error.h include/1609_3/wsmp.h \
-	include/1609_3/wsmp_encode.h test/include/test_wsmp.h include/network.h include/1609_3/wsmp_decode.h include/1609_3/wme.h lib/libwave_sock.h
+	include/1609_3/wsmp_encode.h test/include/test_wsmp.h include/network.h include/1609_3/wsmp_decode.h include/1609_3/wme.h lib/libwave_sock.h \
+	include/controller.h
 
-OBJS=wave_encode.o wave_llc.o pdu_buf.o fmt_error.o wsmp_encode.o wsmp.o network.o wsmp_decode.o wme_mib.o wme.o test_wsmp.o client.o server.o
+OBJS=wave_encode.o wave_llc.o pdu_buf.o fmt_error.o wsmp_encode.o wsmp.o network.o wsmp_decode.o wme_mib.o wme.o test_wsmp.o client.o controller.o main.o
 
 # To build libwave_sock shared library
 SOCKSRC=lib/client.c
@@ -34,14 +35,14 @@ builde: $(OBJS)
 	$(CC) $(CFLAGS) -o executable $(OBJS) -lpcap
 
 clean:
-	rm -rf *.o *.out executable servexec
+	rm -rf *.o *.out executable servexec test/bin/sckfile
 
 ## for packet capturing
 sendcapture:
 	sudo ./executable
 
 genexec: $(OBJS)
-	$(CC) $(CFLAGS) -o  servexec $(OBJS) -lpcap
+	$(CC) $(CFLAGS) -o executable $(OBJS) -lpcap -lpthread
 
 # libwave_sock shared library generation
 libSock.o: $(SOCKSRC)
@@ -78,3 +79,7 @@ main.e:
 
 mainClean:
 	rm -rf src/*.out src/*.o main.out
+	rm -rf test/bin/sckfile
+
+run.main:
+	@./main.out

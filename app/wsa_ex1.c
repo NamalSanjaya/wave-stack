@@ -3,10 +3,12 @@
 
 #include <libwave_sock.h>
 
-#define SCKFILE "<path-to-sockfile>"
+#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
 
-int main(){
+int app_send_wsa();
+int app_send_wsm();
 
+int app_send_wsa(){
     enum action act = add;
     uint8_t dest_mac_addr[6] = {255, 255, 255, 255, 255, 255}; // brodcast address
     enum wsa_type wsatype = unsecured;
@@ -30,4 +32,34 @@ int main(){
     }
     printf("--done--\n");
     return 0;
+}
+
+int app_send_wsm(){
+    uint8_t chan_id = 172; 
+    enum time_slot timeslot = time_slot1; 
+    uint8_t data_rate = 67; 
+    int8_t tx_power = -10; 
+    uint8_t channel_load = 5; 
+    uint8_t info_elem_indicator = 1; 
+    uint8_t prority = 1; 
+    uint64_t wsm_expire_time = 10; 
+    uint16_t len = 11; 
+
+    uint8_t data[1024] = "hello-world";
+    uint8_t peer_mac_addr[6] =  {255, 255, 255, 255, 255, 255}; 
+    uint32_t psid = 0xC00305;
+
+    int8_t st = app_wsm_waveshortmsg_req(chan_id, timeslot,  data_rate, tx_power, channel_load, info_elem_indicator, prority, 
+        wsm_expire_time, len, data, peer_mac_addr, psid, SCKFILE);
+
+    if (st<0){
+        printf("something went wrong...\n");
+        return 1;
+    }
+    printf("--done--\n");
+    return 0;
+}
+
+int main(){
+    return app_send_wsm();
 }

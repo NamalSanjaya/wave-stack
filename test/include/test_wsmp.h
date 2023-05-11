@@ -13,6 +13,6 @@ void print_wra(struct wsmp_wra *wra);
 void print_wsa(struct wsmp_wsa *wsa);
 
 struct wsmp_wsm *gen_wsm_metadata();
-enum confirm_result_code gen_wsm_waveshortmsg_req(wave_pdu *pdu);
+enum confirm_result_code gen_wsm_waveshortmsg_req();
 
 #endif /* _TEST_WSMP_H */

@@ -72,8 +72,7 @@ int main(){
     data = msg;
     struct wsmp_wsm *wsm_metadata = create_wsmp_metadata(subtype, tpid, opt_indicator, chan_id, data_rate, tx_power, psid, len, data);
     wave_pdu *pdu = create_pdu_buf();
-    int gerr = 0;
-    int *err = &gerr;
+    int err[1] ;
     wsmp_wsm_encode(wsm_metadata, pdu, err, WSMP_STRICT);
     if(*err) {
         fprintf(stderr, "went wrong in encoding %d", *err);

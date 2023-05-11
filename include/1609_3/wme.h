@@ -9,6 +9,8 @@
 #define DEFAULT_CCH 178
 // TODO: Remove this when we support multiple operating classess.
 #define OPERATING_CLASS 14
+#define MAXWSMREQS 32
+#define WSMDATAMAXSIZE 2048  
 
 // To check the validity of channel number
 #define IS_NOT_VALID_CHANNEL(elem) \
@@ -141,6 +143,81 @@ typedef struct UserServiceRequestTable {
     size_t size;
 } UserServiceRequestTable;
 
+typedef struct WSM_Req {
+    uint8_t chan_id; 
+    enum time_slot timeslot; 
+    uint8_t data_rate; 
+    int8_t tx_power; 
+    uint8_t channel_load; 
+    uint8_t info_elem_indicator; 
+    uint8_t prority; 
+    uint64_t wsm_expire_time; 
+    uint16_t len; 
+    uint8_t data[WSMDATAMAXSIZE]; 
+    uint8_t peer_mac_addr[6]; 
+    uint32_t psid;
+} WSM_Req_t;
+
+typedef struct WSM_ReqTable{
+    WSM_Req_t table[MAXWSMREQS];  // Able to store 32 WSM requests data
+    size_t cur_index;      // next index to serve
+    size_t filled_index;  // should init to -1;
+    size_t size;          // how many WSM requests are at a time
+} WSM_ReqTable_t;
+
+typedef struct mib {
+    PduTable *pdutb;
+    ProviderServiceRequestTable *psrtb;
+    ProviderChannelInfoTable *pcitb;
+    UserServiceRequestTable *usrtb;
+    WSM_ReqTable_t *wrtb;
+} mib_t;
+
+// from libwave_sock.h
+typedef struct app_ProviderServiceReqEntry{
+    uint8_t id;
+    enum action act; 
+    uint8_t dest_mac_addr[6]; 
+    enum wsa_type wsatype; 
+    uint32_t psid; 
+    uint8_t psc[32];
+    uint8_t psc_len; 
+    enum channel_access chan_access; 
+    bool ip_service; 
+    uint8_t ipv6_addr[16]; 
+    uint16_t service_port; 
+    int8_t rcpi_threshold; 
+    uint8_t wsa_count_threshold;
+    uint8_t wsa_count_thd_interval;
+} app_ProviderServiceReqEntry;
+
+// use in libWave_sock.h library
+typedef struct app_WSM_Req {
+    uint8_t chan_id; 
+    enum time_slot timeslot; 
+    uint8_t data_rate; 
+    int8_t tx_power; 
+    uint8_t channel_load; 
+    uint8_t info_elem_indicator; 
+    uint8_t prority; 
+    uint64_t wsm_expire_time; 
+    uint16_t len; 
+    uint8_t data[WSMDATAMAXSIZE]; 
+    uint8_t peer_mac_addr[6]; 
+    uint32_t psid;
+} app_WSM_Req_t;
+
+typedef struct local_req{
+    int id;
+    app_ProviderServiceReqEntry psre;
+    app_WSM_Req_t wsmr;
+    // Add other app_<reqEntryTypes>
+
+} local_req_t;
+
+
+mib_t *create_mib();
+
 // WME MIB related methods
 ProviderServiceRequestTableEntry *get_wme_prvtb(size_t index, ProviderServiceRequestTable *self);
 ProviderServiceRequestTableEntry *wme_prvtb_get_by_psid(uint32_t psid, ProviderServiceRequestTable *self);
@@ -192,13 +269,17 @@ struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable
 enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
     uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
     bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
-    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime,
-    ProviderServiceRequestTable *prv_tb, ProviderChannelInfoTable *chan_tb, PduTable *pdu_tb);
+    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime, mib_t *mib_db);
 
 uint8_t find_suitable_channel();
 
 enum wme_service_confirm wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint8_t *psid, uint8_t *psc,
     enum wsa_type wsatype, uint8_t channel_id, uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t link_quality, uint8_t immediate_access,
     UserServiceRequestTable *user_serv_tb);
+
+WSM_ReqTable_t *create_wsm_req_tb();
+void add_wsm_req_tb(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, uint8_t info_elem_indicator, 
+    uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid, WSM_ReqTable_t *self);
+WSM_Req_t get_nxt_wsm_req(WSM_ReqTable_t *self, int *err);
 
 #endif /* _WME_H */

@@ -289,8 +289,7 @@ struct wsmp_wsa *create_wsa_metadata(uint8_t wsa_id, ProviderServiceRequestTable
 enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype,
     uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
     bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
-    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime,
-    ProviderServiceRequestTable *prv_tb, ProviderChannelInfoTable *chan_tb, PduTable *pdu_tb){
+    uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime, mib_t *mib_db){
     /**
      * ----- ACTION == Add -------
      * 1. wme-set.req()  (providerServiceInfo) - done
@@ -310,19 +309,19 @@ enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, 
             wsa_chan_id = DEFAULT_CCH;
         }
         wme_prvtb_add(wsatype, psid, psc, chan_access, best_available, OPERATING_CLASS, sch_id, wsa_chan_id, repeat_rate, ip_service, ipv6_addr,
-            provider_mac_addr, service_port, rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, serv_status, prv_tb);
+            provider_mac_addr, service_port, rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, serv_status, mib_db->psrtb);
         
         uint8_t wsa_id = 4;
         int err[1];
 
         wave_pdu *pdu = create_pdu_buf();
-        struct wsmp_wsa *wsa_metadata = create_wsa_metadata(wsa_id, prv_tb, chan_tb);
+        struct wsmp_wsa *wsa_metadata = create_wsa_metadata(wsa_id, mib_db->psrtb, mib_db->pcitb);
         wsmp_wsa_encode(wsa_metadata, pdu, err, WSMP_STRICT);
         if(*err) {
             printf("unable to encode WSA. error: %d", *err);
             return rejected_unspecified;
         }
-        pdu_tb->wsa_store[wsa_id] = pdu;
+        (mib_db->pdutb)->wsa_store[wsa_id] = pdu;
     }
 
     // else if(act == change){}

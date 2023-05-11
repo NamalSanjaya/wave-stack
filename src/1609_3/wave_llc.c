@@ -7,6 +7,7 @@
 #include "../../include/wave_encode.h"
 #include "../../include/pdu_buf.h"
 #include "../../include/fmt_error.h"
+#include "../../include/network.h"
 
 llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype){
     llc_pdu_metadata *ptr = malloc(sizeof(llc_pdu_metadata));
@@ -109,6 +110,7 @@ void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint
     // To verify wsm whole flow is working, we are configuring 1609.4 as userspace process which only use signal channal(no channel switching).
     // This is only for the testing purpose.
     // ma_unitdatax_req()
+    write_tun(pdu);
     free_llc_pdu_metadata(llc_metadata); // put very end
 }
 
@@ -125,7 +127,7 @@ void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, int *err){
 // receive packets from multi-channel operational layer.
 void dl_recv(int *err){
     /** TODO:
-     * 1. block listening to receive data.
+     * 1. block and listen to receive data.
      * 2. decode and extract each field while validating and payload.
      * 3. take necessary action if a field has corrupted or has wrong data.
      * 4. call DL-UNITDATA.ind method to send payload to WSMP layer.
