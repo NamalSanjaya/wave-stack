@@ -134,6 +134,7 @@ void hand_over_stack(local_req_t *req, mib_t *mib_db){
         app_WSM_Req_t wsmr = req->wsmr;
         add_wsm_req_tb(wsmr.chan_id, wsmr.timeslot, wsmr.data_rate, wsmr.tx_power, wsmr.channel_load, wsmr.info_elem_indicator, wsmr.prority, wsmr.wsm_expire_time,
             wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid, mib_db->wrtb);
+        return;
     }
 
     if(req->id == 11){
@@ -141,10 +142,23 @@ void hand_over_stack(local_req_t *req, mib_t *mib_db){
         wme_provider_service_req(local_service_index, psre.act, dest_mac_addr, psre.wsatype, psre.psid, psre.psc, sch_id,
             DEFAULT_CCH, psre.chan_access, repeat_rate, psre.ip_service, psre.ipv6_addr, psre.service_port, provider_mac_addr,
             psre.rcpi_threshold, psre.wsa_count_threshold, psre.wsa_count_thd_interval, info_elements_indicator, sign_lifetime, mib_db);
+        // TODO: WME-Notification.indication()
+        return;
+    }
+
+    if (req->id == 13){
+        app_UserServiceReqEntry_t usre = req->usre;
+        wme_user_service_req(local_service_index, usre.act, usre.user_req_type, usre.psid, usre.psc, usre.wsatype, usre.channel_id, usre.src_mac_addr, usre.advertiser_id, usre.link_quality, usre.immediate_access, mib_db->usrtb);
+        return;
     }
 }
 
 void broadcast_wsa(mib_t *mib_db){
+
+    /** TODO: 
+     * 1. MLMEX-CHSTART.req() (channel access assignment. This primitive in IEEE 1609.4)
+     * 2. Issue WSM_WaveShortMessage.Req() - done
+     */ 
     uint8_t wsa_id = 4;
     int err[1];
     wave_pdu *wsa = get_pdu(wsa_id, mib_db->pdutb);
@@ -162,4 +176,16 @@ void send_wsm(WSM_ReqTable_t *wsm_tb){
     if(*err) return ;
     wsm_waveshortmsg_req(wsmr.chan_id, wsmr.timeslot, wsmr.data_rate, wsmr.tx_power, wsmr.channel_load, wsmr.info_elem_indicator, wsmr.prority, wsmr.wsm_expire_time,
         wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid);
+}
+
+void monitor(){
+    /**
+     * Steps (Listening to Air)
+     * 1. WSM-WaveShortMessage.ind - when WSMP get a WSA then it indicate it to WME.
+     * 2. Set Available Sevice Info in MIB.
+     * Note: 
+     * Schduler need to detect a matching in UserServiceRequest table and UserAvailable table.
+     * If there is a match, we tune to that SCH channel in time slot 1, and listen to that data.
+     * 
+    */
 }
