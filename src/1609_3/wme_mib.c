@@ -429,6 +429,8 @@ void add_wsm_req_tb(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate,
     memcpy(entry->peer_mac_addr, peer_mac_addr, 6);
     entry->psid = psid;
 
+    // TODO: This logic has an issue(core dump). We only can send 32 WSM at the moment. 
+    // We should clear the self->table array and store new data.
     if(self->size >= MAXWSMREQS){
         if(self->cur_index > self->filled_index){
             self->filled_index++;
