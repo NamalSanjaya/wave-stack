@@ -57,6 +57,11 @@ enum time_slot {
     time_slot0, time_slot1
 };
 
+enum user_request_type {
+    auto_access, no_SCH_access
+};
+
+//  for WME primitive
 typedef struct app_ProviderServiceReqEntry{
     uint8_t id;
     enum action act; 
@@ -74,6 +79,20 @@ typedef struct app_ProviderServiceReqEntry{
     uint8_t wsa_count_thd_interval;
 } app_ProviderServiceReqEntry;
 
+typedef struct app_UserServiceReqEntry{
+    enum action act;
+    enum user_request_type user_req_type;
+    uint32_t psid; 
+    enum wsa_type wsatype; 
+    uint8_t psc[32];
+    uint8_t  channel_id;
+    uint8_t src_mac_addr[6]; 
+    uint8_t advertiser_id[32];
+    uint8_t link_quality;
+    uint8_t immediate_access;
+} app_UserServiceReqEntry_t;
+
+// for WSM primitive
 typedef struct app_WSM_Req {
     uint8_t chan_id; 
     enum time_slot timeslot; 
@@ -93,6 +112,7 @@ typedef struct local_req{
     int id;
     app_ProviderServiceReqEntry psre;
     app_WSM_Req_t wsmr;
+    app_UserServiceReqEntry_t usre;
     // Add other app_<reqEntryTypes>
 
 } local_req_t;

@@ -13,6 +13,7 @@ mib_t *create_mib(){
     mib_db->pcitb = create_wme_prv_chan_tb();
     mib_db->usrtb = create_wme_user_serv_req_tb();
     mib_db->wrtb  = create_wsm_req_tb();
+    mib_db->uastb = create_wme_available_service_tb();
     return mib_db;
 }
 
@@ -286,9 +287,8 @@ void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, u
     uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t op_class, uint8_t channel_no, uint8_t link_quality, uint8_t immediate_access, 
     enum service_status serv_status, UserServiceRequestTable *self){
     UserServiceRequestTableEntry *entry = calloc(1, sizeof(UserServiceRequestTableEntry));
-    if(entry == NULL){
-        return;
-    }
+    if(entry == NULL) return;
+    
     entry->UserServiceRequestTableIndex = self->size;
     entry->UserServiceRequestType = req_type;
     memcpy(entry->UserServiceRequestProviderServiceIdentifier, psid, 8); // TODO: PSID is variable length
@@ -306,6 +306,94 @@ void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, u
     entry->UserServiceStatus = serv_status;
 
     memcpy((self->table) + (self->size), entry, sizeof(UserServiceRequestTableEntry));
+    self->size++;
+
+    free(entry);
+}
+
+// methods for UserAvailableService Table
+
+UserAvailableServiceTable_t *create_wme_available_service_tb(){
+    UserAvailableServiceTable_t *tb_obj = calloc(1, sizeof(UserAvailableServiceTable_t));
+    if(tb_obj == NULL) fmt_panic("Unable to allocate memory to create UserServiceRequestTable");
+    
+    uint8_t oid[32] = "1.3.111.2.1609.3.4.2.3.1"; 
+    memcpy(tb_obj->oid, oid, 32) ;
+    tb_obj->size = 0;
+    return tb_obj;
+}
+
+void add_wme_available_service(enum wsa_type wsatype, enum security_result_code sec_result_code, uint8_t *gen_time, uint8_t *lifetime, enum service_status service_status,
+    uint8_t *earliest_nxt_Crl_time, uint8_t *src_mac_addr, uint8_t *psid, uint8_t *psc, uint8_t *ipv6_addr, uint16_t port, uint8_t *provider_mac_addr,
+    uint8_t rcpi_threshold, uint8_t rcpi, uint8_t wsa_count_threshold, uint8_t op_class, uint8_t channel_number, bool adaptable, uint8_t data_rate,
+    int8_t tx_pwr_level, enum channel_access channel_access, uint8_t *advertiser_id, int32_t tx_lat, int32_t tx_long, uint16_t tx_elev, uint8_t link_quality,
+    uint8_t edcaBkCWmin, uint16_t edcaBkCWmax, uint8_t edcaBkAifsn, uint16_t edcaBkTxopLimit, bool edcaBkMandatory,
+    uint8_t edcaBeCWmin, uint16_t edcaBeCWmax, uint8_t edcaBeAifsn, uint16_t edcaBeTxopLimit, bool edcaBeMandatory,
+    uint8_t edcaViCWmin, uint16_t edcaViCWmax, uint8_t edcaViAifsn, uint16_t edcaViTxopLimit, bool edcaViMandatory,
+    uint8_t edcaVoCWmin, uint16_t edcaVoCWmax, uint8_t edcaVoAifsn, uint16_t edcaVoTxopLimit, bool edcaVoMandatory, UserAvailableServiceTable_t *self){
+    UserAvailableServiceTableEntry_t *entry = calloc(1, sizeof(UserAvailableServiceTableEntry_t));
+    if(entry == NULL) return;
+
+    // TODO: remove this
+    uint8_t *nxt_ctrl_time = calloc(8, 1);
+
+    entry->UserAvailableServiceTableIndex = self->size;
+    entry->UserAvailableWsaType = wsatype;
+    entry->UserAvailableSecurityResultCode = sec_result_code;
+
+    memcpy(entry->UserAvailableGenerationTime, gen_time, 8);
+    memcpy(entry->UserAvailableLifetime, lifetime, 8);
+    memcpy(entry->UserAvailableEarliestNextCrlTime, nxt_ctrl_time, 8);
+    memcpy(entry->UserAvailableSourceMacAddress, src_mac_addr, MACADDRSIZE);
+    memcpy(entry->UserAvailableProviderServiceIdentifier, psid, PSIDSIZE);
+    memcpy(entry->UserAvailableProviderServiceContext, psc, PSCSIZE);
+    memcpy(entry->UserAvailableIpv6Address, ipv6_addr, IPADDRSIZE);
+    entry->UserAvailableServicePort = port;
+    memcpy(entry->UserAvailableProviderMacAddress, provider_mac_addr, MACADDRSIZE);
+
+    entry->UserAvailableRcpiThreshold = rcpi_threshold;
+    entry->UserAvailableRcpi = rcpi;
+    entry->UserAvailableWsaCountThreshold = wsa_count_threshold;
+    entry->UserAvailableOperatingClass = op_class;
+    entry->UserAvailableChannelNumber = channel_number;
+
+    entry->UserAvailableAdaptable = adaptable;
+    entry->UserAvailableDataRate = data_rate;
+    entry->UserAvailableTransmitPowerLevel = tx_pwr_level;
+    entry->UserAvailableChannelAccess = channel_access;
+
+    memcpy(entry->UserAvailableAdvertiserIdentifier, advertiser_id, 32);
+    entry->UserAvailableTxLatitude = tx_lat;
+    entry->UserAvailableTxLongitude = tx_long;
+    entry->UserAvailableTxElevation = tx_elev;
+    entry->UserAvailableLinkQuality = link_quality;
+    entry->UserAvailableServiceStatus = service_status;
+
+    entry->UserAvailableEdcaBkCWmin = edcaBkCWmin;
+    entry->UserAvailableEdcaBkCWmax = edcaBkCWmax;
+    entry->UserAvailableEdcaBkAifsn = edcaBkAifsn;
+    entry->UserAvailableEdcaBkTxopLimit = edcaBkTxopLimit;
+    entry->UserAvailableEdcaBkMandatory = edcaBkMandatory;
+
+    entry->UserAvailableEdcaBeCWmin = edcaBeCWmin;
+    entry->UserAvailableEdcaBeCWmax = edcaBeCWmax;
+    entry->UserAvailableEdcaBeAifsn = edcaBeAifsn;
+    entry->UserAvailableEdcaBeTxopLimit = edcaBeTxopLimit;
+    entry->UserAvailableEdcaBeMandatory = edcaBeMandatory;
+
+    entry->UserAvailableEdcaViCWmin = edcaViCWmin;
+    entry->UserAvailableEdcaViCWmax = edcaViCWmax;
+    entry->UserAvailableEdcaViAifsn = edcaViAifsn;
+    entry->UserAvailableEdcaViTxopLimit = edcaViTxopLimit;
+    entry->UserAvailableEdcaViMandatory = edcaViMandatory;
+
+    entry->UserAvailableEdcaVoCWmin = edcaVoCWmin;
+    entry->UserAvailableEdcaVoCWmax = edcaVoCWmax;
+    entry->UserAvailableEdcaVoAifsn = edcaVoAifsn;
+    entry->UserAvailableEdcaVoTxopLimit = edcaVoTxopLimit;
+    entry->UserAvailableEdcaVoMandatory = edcaVoMandatory;
+
+    memcpy((self->table) + (self->size), entry, sizeof(UserAvailableServiceTableEntry_t));
     self->size++;
 
     free(entry);
@@ -341,6 +429,8 @@ void add_wsm_req_tb(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate,
     memcpy(entry->peer_mac_addr, peer_mac_addr, 6);
     entry->psid = psid;
 
+    // TODO: This logic has an issue(core dump). We only can send 32 WSM at the moment. 
+    // We should clear the self->table array and store new data.
     if(self->size >= MAXWSMREQS){
         if(self->cur_index > self->filled_index){
             self->filled_index++;

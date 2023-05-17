@@ -399,6 +399,11 @@ enum confirm_result_code wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot ti
      return accepted;
 }
 
+/**
+ * When to use
+ * 1. In WSA monitoring, once WSMP layer recieved a WSA it will indicate that to WME via this primitive.
+ * 2. 
+*/
 void wsm_waveshortmsg_ind(){
      /**
       * Send data to higher layer application via a socket.

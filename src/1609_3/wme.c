@@ -290,14 +290,6 @@ enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, 
     uint32_t psid, uint8_t *psc, uint8_t sch_id, uint8_t wsa_chan_id, enum time_slot chan_access, uint8_t repeat_rate, 
     bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, uint8_t *provider_mac_addr, int8_t rcpi_threshold, 
     uint8_t wsa_count_threshold, uint8_t wsa_count_thd_interval, uint8_t info_elements_indicator, uint16_t sign_lifetime, mib_t *mib_db){
-    /**
-     * ----- ACTION == Add -------
-     * 1. wme-set.req()  (providerServiceInfo) - done
-     * 2. wme-set.req()  (serviceStatus) - done
-     *  -- check Annex B. providerServiceInfo table entry. `serviceStatus` is just a one parameter there.
-     * 3. MLMEX-CHSTART.req() (channel access assignment. This primitive in IEEE 1609.4)
-     * 4. Create and store WSA under WSA Identifier. (when time slot 0 comes it will get from DB and sent over the air) - done
-     */ 
 
     if(act == add){
         bool best_available = false;                   // Best Available option is set to `false` in our implementation.

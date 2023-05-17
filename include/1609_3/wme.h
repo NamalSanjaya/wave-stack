@@ -12,6 +12,14 @@
 #define MAXWSMREQS 32
 #define WSMDATAMAXSIZE 2048  
 
+// WME MIB tables - All sizes are in bytes
+#define MACADDRSIZE 6 
+#define PSIDSIZE 8
+#define IPADDRSIZE 16
+#define PSCSIZE 32
+
+#define MAXAVAILABLESERVICES 4096
+
 // To check the validity of channel number
 #define IS_NOT_VALID_CHANNEL(elem) \
     ({ \
@@ -53,6 +61,11 @@ enum user_request_type {
 
 enum wme_service_confirm {
     Accepted, RejectedInvalidParameter, RejectedUnspecified
+};
+
+// TODO: List need to be completed
+enum security_result_code{
+    success = 1, inconsistentInputParameters, spduParsingInvalidInput
 };
 
 typedef struct ProviderServiceRequestTableEntry {
@@ -143,6 +156,68 @@ typedef struct UserServiceRequestTable {
     size_t size;
 } UserServiceRequestTable;
 
+typedef struct UserAvailableServiceTableEntry{
+    uint16_t UserAvailableServiceTableIndex;
+    enum wsa_type UserAvailableWsaType;
+    enum security_result_code UserAvailableSecurityResultCode;
+
+    uint8_t UserAvailableGenerationTime[8];
+    uint8_t UserAvailableLifetime[8];
+    uint8_t UserAvailableEarliestNextCrlTime[8];
+    uint8_t UserAvailableSourceMacAddress[MACADDRSIZE];
+    uint8_t UserAvailableProviderServiceIdentifier[PSIDSIZE];
+    uint8_t UserAvailableProviderServiceContext[PSCSIZE];
+    uint8_t UserAvailableIpv6Address[IPADDRSIZE];
+    uint16_t UserAvailableServicePort;
+    uint8_t UserAvailableProviderMacAddress[MACADDRSIZE];
+    uint8_t UserAvailableRcpiThreshold;
+    uint8_t UserAvailableRcpi;
+    uint8_t UserAvailableWsaCountThreshold;
+    uint8_t UserAvailableOperatingClass;
+    uint8_t UserAvailableChannelNumber;
+    bool UserAvailableAdaptable;
+    uint8_t UserAvailableDataRate;
+    int8_t UserAvailableTransmitPowerLevel;
+    enum channel_access UserAvailableChannelAccess;
+    uint8_t UserAvailableAdvertiserIdentifier[32];
+    int32_t UserAvailableTxLatitude;
+    int32_t UserAvailableTxLongitude;
+    uint16_t UserAvailableTxElevation;   // This is differnet from what is in the 1609.3 Std
+    uint8_t UserAvailableLinkQuality;
+    enum service_status UserAvailableServiceStatus;
+
+    uint8_t UserAvailableEdcaBkCWmin;
+    uint16_t UserAvailableEdcaBkCWmax;
+    uint8_t UserAvailableEdcaBkAifsn;
+    uint16_t UserAvailableEdcaBkTxopLimit;
+    bool UserAvailableEdcaBkMandatory;
+
+    uint8_t UserAvailableEdcaBeCWmin;
+    uint16_t UserAvailableEdcaBeCWmax;
+    uint8_t UserAvailableEdcaBeAifsn;
+    uint16_t UserAvailableEdcaBeTxopLimit;
+    bool UserAvailableEdcaBeMandatory;
+
+    uint8_t UserAvailableEdcaViCWmin;
+    uint16_t UserAvailableEdcaViCWmax;
+    uint8_t UserAvailableEdcaViAifsn;
+    uint16_t UserAvailableEdcaViTxopLimit;
+    bool UserAvailableEdcaViMandatory;
+
+    uint8_t UserAvailableEdcaVoCWmin;
+    uint16_t UserAvailableEdcaVoCWmax;
+    uint8_t UserAvailableEdcaVoAifsn;
+    uint16_t UserAvailableEdcaVoTxopLimit;
+    bool UserAvailableEdcaVoMandatory;
+
+} UserAvailableServiceTableEntry_t;
+
+typedef struct UserAvailableServiceTable {
+    uint8_t oid[32];
+    UserAvailableServiceTableEntry_t table[MAXAVAILABLESERVICES];
+    size_t size;
+} UserAvailableServiceTable_t;
+
 typedef struct WSM_Req {
     uint8_t chan_id; 
     enum time_slot timeslot; 
@@ -170,6 +245,7 @@ typedef struct mib {
     ProviderServiceRequestTable *psrtb;
     ProviderChannelInfoTable *pcitb;
     UserServiceRequestTable *usrtb;
+    UserAvailableServiceTable_t *uastb;
     WSM_ReqTable_t *wrtb;
 } mib_t;
 
@@ -191,6 +267,19 @@ typedef struct app_ProviderServiceReqEntry{
     uint8_t wsa_count_thd_interval;
 } app_ProviderServiceReqEntry;
 
+typedef struct app_UserServiceReqEntry{
+    enum action act;
+    enum user_request_type user_req_type;
+    uint32_t psid; 
+    enum wsa_type wsatype; 
+    uint8_t psc[32];
+    uint8_t  channel_id;
+    uint8_t src_mac_addr[6]; 
+    uint8_t advertiser_id[32];
+    uint8_t link_quality;
+    uint8_t immediate_access;
+} app_UserServiceReqEntry_t;
+
 // use in libWave_sock.h library
 typedef struct app_WSM_Req {
     uint8_t chan_id; 
@@ -211,10 +300,10 @@ typedef struct local_req{
     int id;
     app_ProviderServiceReqEntry psre;
     app_WSM_Req_t wsmr;
+    app_UserServiceReqEntry_t usre;
     // Add other app_<reqEntryTypes>
 
 } local_req_t;
-
 
 mib_t *create_mib();
 
@@ -248,6 +337,17 @@ UserServiceRequestTable *create_wme_user_serv_req_tb();
 void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, uint8_t *psc, uint8_t priority, enum wsa_type wsatype,
     uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t op_class, uint8_t channel_no, uint8_t link_quality, uint8_t immediate_access, 
     enum service_status serv_status, UserServiceRequestTable *self);
+
+// methods for UserAvailableService Table
+UserAvailableServiceTable_t *create_wme_available_service_tb();
+void add_wme_available_service(enum wsa_type wsatype, enum security_result_code sec_result_code, uint8_t *gen_time, uint8_t *lifetime, enum service_status service_status,
+    uint8_t *earliest_nxt_Crl_time, uint8_t *src_mac_addr, uint8_t *psid, uint8_t *psc, uint8_t *ipv6_addr, uint16_t port, uint8_t *provider_mac_addr,
+    uint8_t rcpi_threshold, uint8_t rcpi, uint8_t wsa_count_threshold, uint8_t op_class, uint8_t channel_number, bool adaptable, uint8_t data_rate,
+    int8_t tx_pwr_level, enum channel_access channel_access, uint8_t *advertiser_id, int32_t tx_lat, int32_t tx_long, uint16_t tx_elev, uint8_t link_quality,
+    uint8_t edcaBkCWmin, uint16_t edcaBkCWmax, uint8_t edcaBkAifsn, uint16_t edcaBkTxopLimit, bool edcaBkMandatory,
+    uint8_t edcaBeCWmin, uint16_t edcaBeCWmax, uint8_t edcaBeAifsn, uint16_t edcaBeTxopLimit, bool edcaBeMandatory,
+    uint8_t edcaViCWmin, uint16_t edcaViCWmax, uint8_t edcaViAifsn, uint16_t edcaViTxopLimit, bool edcaViMandatory,
+    uint8_t edcaVoCWmin, uint16_t edcaVoCWmax, uint8_t edcaVoAifsn, uint16_t edcaVoTxopLimit, bool edcaVoMandatory, UserAvailableServiceTable_t *self);
 
 // WME related methods
 struct wsmp_iex *create_wsa_iex(uint8_t repeat_rate, bool use_loc2d,  uint32_t loc2d_latitude, uint32_t loc2d_longitude, bool use_loc3d,
