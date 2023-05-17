@@ -277,7 +277,7 @@ typedef struct app_UserServiceReqEntry{
     uint8_t src_mac_addr[6]; 
     uint8_t advertiser_id[32];
     uint8_t link_quality;
-    uint8_t immediateAccess;
+    uint8_t immediate_access;
 } app_UserServiceReqEntry_t;
 
 // use in libWave_sock.h library

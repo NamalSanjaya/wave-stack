@@ -334,13 +334,16 @@ void add_wme_available_service(enum wsa_type wsatype, enum security_result_code 
     UserAvailableServiceTableEntry_t *entry = calloc(1, sizeof(UserAvailableServiceTableEntry_t));
     if(entry == NULL) return;
 
+    // TODO: remove this
+    uint8_t *nxt_ctrl_time = calloc(8, 1);
+
     entry->UserAvailableServiceTableIndex = self->size;
     entry->UserAvailableWsaType = wsatype;
     entry->UserAvailableSecurityResultCode = sec_result_code;
 
     memcpy(entry->UserAvailableGenerationTime, gen_time, 8);
     memcpy(entry->UserAvailableLifetime, lifetime, 8);
-    memcpy(entry->UserAvailableEarliestNextCrlTime, sec_result_code, 8);
+    memcpy(entry->UserAvailableEarliestNextCrlTime, nxt_ctrl_time, 8);
     memcpy(entry->UserAvailableSourceMacAddress, src_mac_addr, MACADDRSIZE);
     memcpy(entry->UserAvailableProviderServiceIdentifier, psid, PSIDSIZE);
     memcpy(entry->UserAvailableProviderServiceContext, psc, PSCSIZE);
