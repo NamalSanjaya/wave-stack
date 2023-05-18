@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include <libwave_sock.h>
 
@@ -7,6 +8,10 @@
 
 int app_send_wsa();
 int app_send_wsm();
+void store8(uint8_t *buf,uint8_t *i, uint8_t data);
+void store32(uint8_t *buf,uint8_t *i, uint32_t data);
+void print_bin8(uint8_t value);
+void print_binx(uint8_t *buf, size_t size);
 
 int app_send_wsa(){
     enum action act = add;
@@ -43,15 +48,27 @@ int app_send_wsm(){
     uint8_t info_elem_indicator = 1; 
     uint8_t prority = 1; 
     uint64_t wsm_expire_time = 10; 
-    uint16_t len = 11; 
 
-    uint8_t data[1024] = "hello-world";
+    // only for two 32-bits fields
+    uint16_t len = 64; 
+
+    int32_t loc2d_lat, loc2d_longt;
+    loc2d_lat = 20;
+    loc2d_longt = 83;
+
+    uint8_t *data = (uint8_t *) calloc(len, sizeof(uint8_t));
+
+    uint8_t indx = 0;
+    store32(data, &indx, loc2d_lat);
+    store32(data, &indx, loc2d_longt);
+
     uint8_t peer_mac_addr[6] =  {255, 255, 255, 255, 255, 255}; 
     uint32_t psid = 0xC00305;
 
     int8_t st = app_wsm_waveshortmsg_req(chan_id, timeslot,  data_rate, tx_power, channel_load, info_elem_indicator, prority, 
         wsm_expire_time, len, data, peer_mac_addr, psid, SCKFILE);
 
+    print_binx(data, len);
     if (st<0){
         printf("something went wrong...\n");
         return 1;
@@ -59,6 +76,35 @@ int app_send_wsm(){
     printf("--done--\n");
     return 0;
 }
+
+void store8(uint8_t *buf,uint8_t *i, uint8_t data){
+    buf[*i] = data;
+    (*i)++;
+}
+
+void store32(uint8_t *buf,uint8_t *i, uint32_t data){
+    store8(buf, i, data >> 24);
+    store8(buf, i, data >> 16);
+    store8(buf, i, data >> 8);
+    store8(buf, i, data);
+}
+
+// print binary format of 1-byte value
+void print_bin8(uint8_t value){
+    for (int i = 7; i >= 0; i--)
+        printf("%d", (value & (1 << i)) >> i );
+    printf(",");
+}
+
+// print binary format for a given size.
+void print_binx(uint8_t *buf, size_t size){
+    for (size_t i = 0; i < size; i++){
+        print_bin8(*(buf+i));
+    }
+    printf("\n");
+}
+
+
 
 int main(){
     return app_send_wsm();
