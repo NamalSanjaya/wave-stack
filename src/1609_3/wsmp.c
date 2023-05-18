@@ -404,10 +404,13 @@ enum confirm_result_code wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot ti
  * 1. In WSA monitoring, once WSMP layer recieved a WSA it will indicate that to WME via this primitive.
  * 2. 
 */
-void wsm_waveshortmsg_ind(){
+void wsm_waveshortmsg_ind(uint8_t version, uint8_t channel_number, uint8_t data_rate, int8_t tx_power,
+     uint8_t channel_load, uint8_t prority, uint16_t len, uint8_t *peer_mac_addr, uint32_t psid, wave_pdu *pdu){
      /**
-      * Send data to higher layer application via a socket.
-      * 1. May need to find the respective socket an connect to it
-      * 2. send data to it.
+      * For WSA - store data in MIB avaible table
+      * For WSM - send the data to upper layer
      */
+    
+    
+
 }
