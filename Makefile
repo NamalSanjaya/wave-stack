@@ -24,8 +24,10 @@ SOCKOS=lib/bin/so/libwave_sock.so
 
 # To run demo examples
 DEMO_APP = app/wsa_ex1.c
+DEMO_WSMAPP = app/wsm_ex1.c
 DEMO_LIBS = -lwave_sock
-DEMO_EXEC = app/bin/exec
+DEMO_WSAEXEC = app/bin/wsaexec
+DEMO_WSMEXEC = app/bin/wsmexec
 
 buildo: $(SRC) $(HDR)
 	$(CC) $(CFLAGS) -c $(SRC) 
@@ -35,7 +37,7 @@ builde: $(OBJS)
 	$(CC) $(CFLAGS) -o executable $(OBJS) -lpcap
 
 clean:
-	rm -rf *.o *.out executable servexec test/bin/sckfile
+	rm -rf *.o *.out executable servexec test/bin/sckfile test/bin/wave_sckfile
 
 ## for packet capturing
 sendcapture:
@@ -63,11 +65,17 @@ uninstall:
 	rm $(LIBDIR)/libwave_sock.so
 
 # Run app/wsa_ex1.c demo
-gendemo.wsa1:
-	$(CC) -o $(DEMO_EXEC) $(DEMO_APP) $(DEMO_LIBS)
+gen.demo.wsa1:
+	$(CC) -o $(DEMO_WSAEXEC) $(DEMO_APP) $(DEMO_LIBS)
 
 run.demo.wsa1: 
-	@./$(DEMO_EXEC)
+	@./$(DEMO_WSAEXEC)
+
+gen.demo.wsm1:
+	$(CC) -o $(DEMO_WSMEXEC) $(DEMO_WSMAPP) $(DEMO_LIBS)
+
+run.demo.wsm1: 
+	@./$(DEMO_WSMEXEC)
 
 # Related to stack main function
 main.o:

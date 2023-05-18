@@ -7,11 +7,13 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <pcap.h>
 
 #include "../include/controller.h"
 #include "../include/1609_3/wme.h"
 #include "../include/pdu_buf.h"
 #include "../include/1609_3/wsmp.h"
+#include "../include/1609_3/wave_llc.h"
 
 int slot = 0;
 
@@ -66,7 +68,8 @@ void *scheduler(void *arg){
              * its content and all other its data. 
              * 
             */
-           send_wsm(mib_db->wrtb);
+        //    send_wsm(mib_db->wrtb);
+            monitor_wsm();
         }
         slot = slot == 0 ? 1 : 0;
         pthread_cond_wait(&chan_timer, &mutex_slot);
@@ -178,7 +181,7 @@ void send_wsm(WSM_ReqTable_t *wsm_tb){
         wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid);
 }
 
-void monitor(){
+void monitor_wsm(){
     /**
      * Steps (Listening to Air)
      * 1. WSM-WaveShortMessage.ind - when WSMP get a WSA then it indicate it to WME.
@@ -188,4 +191,69 @@ void monitor(){
      * If there is a match, we tune to that SCH channel in time slot 1, and listen to that data.
      * 
     */
+    wave_pdu *pdu = create_pdu_buf();
+    int err[1];
+    size_t total = capture_incoming_data(pdu, err);
+    if(*err){
+        printf("unable to caputer WSM..\n");
+        return;
+    }
+    printf("Pcap read: %d\n", total);
+    if(total == 0) return;
+    dl_recv(pdu, err);
+}
+
+size_t capture_incoming_data(wave_pdu *pdu, int *err){
+    pcap_t* handle;
+    char errbuf[PCAP_ERRBUF_SIZE];
+    struct PacketData packet_data;
+    *err = 0;
+    handle = pcap_open_offline(PCAPFILE, errbuf);
+    if (handle == NULL) {
+        fprintf(stderr, "Error opening pcap file: %s\n", errbuf);
+        *err = 1;
+        return 0;
+    }
+
+    packet_data.payload = NULL;
+    pcap_dispatch(handle, -1, packet_callback, (unsigned char*)&packet_data);
+
+    // To remove IEEE 802.11p part
+    size_t llc_start_indx = 41; 
+    size_t sent_upper = 0;
+    if (packet_data.payload != NULL) {  
+        sent_upper = packet_data.payload_length-llc_start_indx;      
+        add_data_to_pbuf(pdu, packet_data.payload+llc_start_indx, sent_upper, err);
+        free(packet_data.payload);
+        
+    } else {
+        printf("No packets found in the pcap file.\n");
+        return 0;
+    }
+    pcap_close(handle);
+    return sent_upper;
+}
+
+void packet_callback(unsigned char* user_data, const struct pcap_pkthdr* pkthdr, const unsigned char* packet) {
+    struct PacketData* packet_data = (struct PacketData*)user_data;
+    packet_data->payload = (unsigned char*)malloc(pkthdr->caplen);
+    memcpy(packet_data->payload, packet, pkthdr->caplen);
+    packet_data->payload_length = pkthdr->caplen;
+}
+
+int wave_sock_init(const char *sckfile){
+    int socket_fd;
+    struct sockaddr_un name;
+
+    // Create a socket
+    socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (socket_fd == -1) return -1;
+
+    // Connect to the server socket
+    memset(&name, 0, sizeof(name));
+    name.sun_family = AF_UNIX;
+    strncpy(name.sun_path, sckfile, sizeof(name.sun_path) - 1);
+    if (connect(socket_fd, (struct sockaddr*) &name, sizeof(name)) == -1) return -1;
+
+    return socket_fd;
 }
