@@ -7,51 +7,49 @@
 
 #include "libwave_sock.h"
 
-#define SCKFILE "<path-to-sockfile>"
 
-int server_init_temp(const char *sckfile){
-    int server_fd;
+int wave_sock_open_temp(const char *sckfile){
+    int sock_fd;
     struct sockaddr_un server_addr;
 
     // Create a socket
-    server_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if (server_fd == -1) return -1;
+    sock_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sock_fd == -1) return -1;
 
     // Bind the socket to a name
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sun_family = AF_UNIX;
     strncpy(server_addr.sun_path, sckfile, sizeof(server_addr.sun_path) - 1);
-    if (bind(server_fd, (struct sockaddr*) &server_addr, sizeof(server_addr)) == -1) return -1;
+    if (bind(sock_fd, (struct sockaddr*) &server_addr, sizeof(server_addr)) == -1) return -1;
 
     // Listen for connections. can queue upto 32 requests
-    if (listen(server_fd, 32) == -1) return -1;
-    printf("listen....\n");
-    return server_fd;
+    if (listen(sock_fd, 32) == -1) return -1;
+    return sock_fd;
 }
 
-void server_listen_temp(int server_fd){
+void wave_sock_listen_temp(int sock_fd){
     int len;
     struct sockaddr_un client_addr;
     socklen_t client_addr_len;
-    app_ProviderServiceReqEntry psre;
+    local_resp_t resp;
 
     while(1){
         // Accept a connection
         client_addr_len = sizeof(client_addr);
-        client_fd = accept(server_fd, (struct sockaddr*) &client_addr, &client_addr_len);
+        client_fd = accept(sock_fd, (struct sockaddr*) &client_addr, &client_addr_len);
         if (client_fd == -1) {
-            printf("connection failed...\n");
+            printf("wave_socket failed...\n");
             continue;
         }
 
         // Receive the employee struct from the client
-        len = recv(client_fd, &psre, sizeof(psre), 0);
+        len = recv(client_fd, &resp, sizeof(resp), 0);
         if (len == -1) {
-            printf("receiving error...\n");
+            printf("receiving error in wave socket...\n");
             continue;
         }
         // Print the received employee struct
-        print_app_ProviderServiceReqEntry(&psre);
+        printf("data-size: %d...\n", resp->data_size);
         close(client_fd);
     }
 }

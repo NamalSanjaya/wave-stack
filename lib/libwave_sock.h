@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // primitive identifiers
 #define WSM_WaveShortMessage_request 1
@@ -117,6 +118,13 @@ typedef struct local_req{
 
 } local_req_t;
 
+typedef struct local_resp{
+    uint8_t buf[WSMDATAMAXSIZE];
+    size_t data_size;
+} local_resp_t;
+
+typedef void (*resp_handler)(local_resp_t *);
+
 int8_t _put_uint8(uint8_t *buf, size_t *i, const uint8_t v);
 int8_t _put_uint8_n(uint8_t *buf, size_t *i, size_t n, const uint8_t *v);
 int8_t _put_uint16(uint8_t *buf, size_t *i, const uint16_t v);
@@ -125,6 +133,9 @@ void print_app_ProviderServiceReqEntry(app_ProviderServiceReqEntry *psre);
 
 int send_data(uint8_t *src, size_t size, const char *sckfile);
 int init_socket(const char *sckfile);
+
+int wave_sock_open(const char *sckfile);
+void wave_sock_listen(int sock_fd, resp_handler cb);
 
 int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum wsa_type wsatype, uint32_t psid, 
     uint8_t *psc, uint8_t psc_len, enum channel_access chan_access, bool ip_service, uint8_t *ipv6_addr, uint16_t service_port, int8_t rcpi_threshold, 
