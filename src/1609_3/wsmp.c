@@ -18,12 +18,15 @@
  * USA.
  */
 
+#include <sys/socket.h>
+
 #include "../../include/1609_3/wsmp.h"
 #include "../../include/1609_3/wave_llc.h"
 #include "../../include/1609_3/wsmp_encode.h"
 #include "../../include/1609_3/wave_llc.h"
 #include "../../include/fmt_error.h"
 #include "../../include/network.h"
+#include "../../include/controller.h"
 
 void free_iex(struct wsmp_iex *curs) {
      if (curs == NULL)
@@ -404,13 +407,25 @@ enum confirm_result_code wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot ti
  * 1. In WSA monitoring, once WSMP layer recieved a WSA it will indicate that to WME via this primitive.
  * 2. 
 */
-void wsm_waveshortmsg_ind(uint8_t version, uint8_t channel_number, uint8_t data_rate, int8_t tx_power,
-     uint8_t channel_load, uint8_t prority, uint16_t len, uint8_t *peer_mac_addr, uint32_t psid, wave_pdu *pdu){
+void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm){
      /**
       * For WSA - store data in MIB avaible table
       * For WSM - send the data to upper layer
      */
-    
-    
+     local_resp_t *resp = (local_resp_t *) calloc(1, sizeof(local_resp_t));
+     memcpy(resp->buf, wsm->data, wsm->len);
 
+     resp->data_size = wsm->len;
+
+     int wave_sock_fd = wave_sock_init(WAVE_SCKFILE);
+     if(wave_sock_fd == -1) {
+          printf("err: wave_sock_fd == -1..\n");
+          return;
+     }
+
+    if (send(wave_sock_fd, resp, sizeof(*resp), 0) == -1) {
+        printf("went wrong..\n");
+        return;
+    }
+    
 }

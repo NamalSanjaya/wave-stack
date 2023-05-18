@@ -8,6 +8,7 @@
 #include "../../include/pdu_buf.h"
 #include "../../include/fmt_error.h"
 #include "../../include/network.h"
+#include "../../include/1609_3/wsmp_decode.h"
 
 llc_pdu_metadata *init_llc_pdu_metadata(uint16_t ethertype){
     llc_pdu_metadata *ptr = malloc(sizeof(llc_pdu_metadata));
@@ -119,15 +120,19 @@ void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, int *err){
     *err=0;
     if(llc_metadata->ethertype == WAVE_LLC_ETHERTYPE_IP){
         // current tcp/ip is not supported. log a warning msg
+        printf("tcp/ip is not supported...\n");
         return;
     }
     // TODO: call WSMP layer function to handover the data.
     // Decode wsm
-    // WSM-WaveShortMessage.indication()
+    // WSM-WaveShortMessage.indication(...., wsm_payload,...)
+    struct wsmp_wsm *wsm = wsmp_wsm_decode(pdu, err, WSMP_STRICT);
+    free_pbuf(pdu);
+    wsm_waveshortmsg_ind(wsm);
 }
 
 // receive packets from multi-channel operational layer.
-void dl_recv(int *err){
+void dl_recv(wave_pdu *pdu, int *err){
     /** TODO:
      * 1. block and listen to receive data.
      * 2. decode and extract each field while validating and payload.
@@ -135,12 +140,12 @@ void dl_recv(int *err){
      * 4. call DL-UNITDATA.ind method to send payload to WSMP layer.
     */
     *err=0;
-    wave_pdu *pdu = create_pdu_buf();
     // TODO: 1. block listening to receive data. update the pdu as necessary
     // to represent a frame received from multi-channel operation layer.
     llc_pdu_metadata *llc_metadata = llc_decode(pdu, err);
     if(*err){
         // log relvent error
+        printf("unable to decode llc metadata \n");
         return;
     }
     dl_unitdata_ind(llc_metadata, pdu, err);
