@@ -122,6 +122,8 @@ void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, int *err){
         return;
     }
     // TODO: call WSMP layer function to handover the data.
+    // Decode wsm
+    // WSM-WaveShortMessage.indication()
 }
 
 // receive packets from multi-channel operational layer.
