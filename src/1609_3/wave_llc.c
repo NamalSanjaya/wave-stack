@@ -2,8 +2,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "../../include/1609_3/wave_llc.h"
-#include "../../include/1609_3/wsmp.h"
+#include "../../include/1609_3/wsmp.h" // circular dependency
+#include "../../include/1609_3/wme.h"
 #include "../../include/wave_encode.h"
 #include "../../include/pdu_buf.h"
 #include "../../include/fmt_error.h"
@@ -116,7 +118,7 @@ void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint
 }
 
 // send payload to WSMP layer.
-void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, int *err){
+void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, UserAvailableServiceTable_t *uastb, int *err){
     *err=0;
     if(llc_metadata->ethertype == WAVE_LLC_ETHERTYPE_IP){
         // current tcp/ip is not supported. log a warning msg
@@ -128,11 +130,11 @@ void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, int *err){
     // WSM-WaveShortMessage.indication(...., wsm_payload,...)
     struct wsmp_wsm *wsm = wsmp_wsm_decode(pdu, err, WSMP_STRICT);
     free_pbuf(pdu);
-    wsm_waveshortmsg_ind(wsm);
+    wsm_waveshortmsg_ind(wsm, uastb);
 }
 
 // receive packets from multi-channel operational layer.
-void dl_recv(wave_pdu *pdu, int *err){
+void dl_recv(wave_pdu *pdu, UserAvailableServiceTable_t *uastb, int *err){
     /** TODO:
      * 1. block and listen to receive data.
      * 2. decode and extract each field while validating and payload.
@@ -148,5 +150,5 @@ void dl_recv(wave_pdu *pdu, int *err){
         printf("unable to decode llc metadata \n");
         return;
     }
-    dl_unitdata_ind(llc_metadata, pdu, err);
+    dl_unitdata_ind(llc_metadata, pdu, uastb, err);
 }
