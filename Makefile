@@ -8,7 +8,7 @@ INCLUDEDIR = $(PREFIX)/include
 
 SRC=src/wave_encode.c src/1609_3/wave_llc.c src/pdu_buf.c src/fmt_error.c src/1609_3/wsmp_encode.c src/1609_3/wsmp.c \
 	test/src/test_main.c test/src/test_wsmp.c src/network.c src/1609_3/wsmp_decode.c src/1609_3/wme_mib.c src/controller.c \
-	src/1609_3/wme.c lib/client.c src/main.c
+	src/1609_3/wme.c lib/client.c src/main.c test/src/test_wme.c
 
 HDR=include/wave_encode.h include/1609_3/wave_llc.h include/pdu_buf.h include/fmt_error.h include/1609_3/wsmp.h \
 	include/1609_3/wsmp_encode.h test/include/test_wsmp.h include/network.h include/1609_3/wsmp_decode.h include/1609_3/wme.h lib/libwave_sock.h \

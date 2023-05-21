@@ -301,7 +301,7 @@ enum confirm_result_code gen_wsm_waveshortmsg_req(){
      int8_t tx_power=0x9E;
      uint64_t wsm_exptime = 1000;
      enum time_slot tmslot = time_slot0;
-     uint8_t *peer_macaddr = 0x1166aabbdd22;
+     uint8_t peer_macaddr[6] = {1,2,3,4,5,6};
      uint32_t psid = 0xC00305;
      uint16_t len = 11;
      uint8_t *data = calloc(len, sizeof(char));

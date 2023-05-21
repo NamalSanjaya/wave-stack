@@ -53,8 +53,8 @@ int app_send_wsm(){
     uint16_t len = 64; 
 
     int32_t loc2d_lat, loc2d_longt;
-    loc2d_lat = 20;
-    loc2d_longt = 83;
+    loc2d_lat = -19988;
+    loc2d_longt = -29988;
 
     uint8_t *data = (uint8_t *) calloc(len, sizeof(uint8_t));
 
@@ -68,7 +68,7 @@ int app_send_wsm(){
     int8_t st = app_wsm_waveshortmsg_req(chan_id, timeslot,  data_rate, tx_power, channel_load, info_elem_indicator, prority, 
         wsm_expire_time, len, data, peer_mac_addr, psid, SCKFILE);
 
-    print_binx(data, len);
+    // print_binx(data, len);
     if (st<0){
         printf("something went wrong...\n");
         return 1;

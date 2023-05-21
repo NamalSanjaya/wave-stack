@@ -192,5 +192,5 @@ void test_provider_service_req(){
 }
 
 int main(){
-    test_provider_service_req();
+    exec_test_wsa();
 }
