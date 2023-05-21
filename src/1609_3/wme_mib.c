@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
+#include "../../include/1609_3/wsmp.h"
 #include "../../include/1609_3/wme.h"
 #include "../../include/fmt_error.h"
 
@@ -41,14 +43,13 @@ ProviderServiceRequestTableEntry *wme_prvtb_get_by_psid(uint32_t psid, ProviderS
 }
 
 // Add a Service metadata to ProviderServiceRequest Table
-void wme_prvtb_add(enum wsa_type  wsatype, uint32_t psid, uint8_t *psc, enum channel_access  chan_access, bool best_available, uint32_t op_class, 
-    uint8_t  ps_chan_no, uint8_t  wsa_chan_no, uint8_t  repeat_rate, bool ip_service, uint8_t *ipv6_address, uint8_t *provider_mac_addr,    
-    uint16_t service_port, int8_t  rcpi_threshold, uint8_t  wsa_count_threshold, uint8_t  wsa_count_threshold_intrv, enum service_status  serv_status,
+void wme_prvtb_add(enum wsa_type wsatype, uint32_t psid, uint8_t *psc, enum channel_access chan_access, bool best_available, uint32_t op_class, 
+    uint8_t ps_chan_no, uint8_t wsa_chan_no, uint8_t repeat_rate, bool ip_service, uint8_t *ipv6_address, uint8_t *provider_mac_addr,    
+    uint16_t service_port, int8_t rcpi_threshold, uint8_t wsa_count_threshold, uint8_t wsa_count_threshold_intrv, enum service_status serv_status,
     ProviderServiceRequestTable *self){
     ProviderServiceRequestTableEntry *entry = calloc(1, sizeof(ProviderServiceRequestTableEntry));
-    if(entry == NULL){
-        return;
-    }
+    if(entry == NULL) return;
+    
     entry->ProviderServiceRequestTableIndex = self->size;
     entry->WsaType = wsatype;
     entry->ProviderServiceIdentifier = psid;
@@ -76,9 +77,8 @@ void wme_prvtb_add(enum wsa_type  wsatype, uint32_t psid, uint8_t *psc, enum cha
 
 ProviderServiceRequestTable *create_wme_provider_tb(){
     ProviderServiceRequestTable *tb_obj = calloc(1, sizeof(ProviderServiceRequestTable));
-    if(tb_obj == NULL){
-        fmt_panic("Unable to allocate memory to create ProviderServiceRequestTable");
-    }
+    if(tb_obj == NULL) fmt_panic("Unable to allocate memory to create ProviderServiceRequestTable");
+    
     uint8_t oid[32] = "1.3.111.2.1609.3.4.2.1.4" ; 
     memcpy(tb_obj->oid, oid, 32) ;
     tb_obj->size = 0;
@@ -162,9 +162,8 @@ printf(".... Table Entry Info ....\n");
 
 ProviderChannelInfoTable *create_wme_prv_chan_tb(){
     ProviderChannelInfoTable *tb_obj = calloc(1, sizeof(ProviderChannelInfoTable));
-    if(tb_obj == NULL){
-        fmt_panic("Unable to allocate memory to create ProviderChannelInfoTable");
-    }
+    if(tb_obj == NULL) fmt_panic("Unable to allocate memory to create ProviderChannelInfoTable");
+    
     uint8_t oid[32] = "1.3.111.2.1609.3.4.2.1.3" ; 
     memcpy(tb_obj->oid, oid, 32) ;
     tb_obj->size = 0;
@@ -178,9 +177,8 @@ void add_wme_prv_chan_tb(uint8_t op_class, uint8_t chan_no, bool is_adaptable, u
     uint8_t edcaVo_CWmin, uint32_t edcaVo_CWmax, uint8_t edcaVo_Aifsn, uint32_t edcaVo_TxopLimit, bool edcaVo_Mandatory, 
     ProviderChannelInfoTable *self){
     ProviderChannelInfoTableEntry *entry = calloc(1, sizeof(ProviderChannelInfoTableEntry));
-    if(entry == NULL){
-        return;
-    }
+    if(entry == NULL) return;
+    
     entry->ProviderChannelInfoTableIndex = self->size;
     entry->ProviderChannelInfoOperatingClass = op_class;
     entry->ProviderChannelInfoChannelNumber = chan_no;
@@ -317,16 +315,16 @@ UserAvailableServiceTable_t *create_wme_available_service_tb(){
     UserAvailableServiceTable_t *tb_obj = calloc(1, sizeof(UserAvailableServiceTable_t));
     if(tb_obj == NULL) fmt_panic("Unable to allocate memory to create UserServiceRequestTable");
     
-    uint8_t oid[32] = "1.3.111.2.1609.3.4.2.3.1"; 
+    uint8_t oid[32] = "1.3.111.2.1609.3.4.2.3.1";  // change
     memcpy(tb_obj->oid, oid, 32) ;
     tb_obj->size = 0;
     return tb_obj;
 }
 
 void add_wme_available_service(enum wsa_type wsatype, enum security_result_code sec_result_code, uint8_t *gen_time, uint8_t *lifetime, enum service_status service_status,
-    uint8_t *earliest_nxt_Crl_time, uint8_t *src_mac_addr, uint8_t *psid, uint8_t *psc, uint8_t *ipv6_addr, uint16_t port, uint8_t *provider_mac_addr,
+    uint8_t *earliest_nxt_Crl_time, uint8_t *src_mac_addr, uint32_t psid, uint16_t psc_len, uint8_t *psc, uint8_t *ipv6_addr, uint16_t port, uint8_t *provider_mac_addr,
     uint8_t rcpi_threshold, uint8_t rcpi, uint8_t wsa_count_threshold, uint8_t op_class, uint8_t channel_number, bool adaptable, uint8_t data_rate,
-    int8_t tx_pwr_level, enum channel_access channel_access, uint8_t *advertiser_id, int32_t tx_lat, int32_t tx_long, uint16_t tx_elev, uint8_t link_quality,
+    int8_t tx_pwr_level, enum channel_access channel_access, uint16_t advert_len, uint8_t *advert_id, int32_t tx_lat, int32_t tx_long, uint16_t tx_elev, uint8_t link_quality,
     uint8_t edcaBkCWmin, uint16_t edcaBkCWmax, uint8_t edcaBkAifsn, uint16_t edcaBkTxopLimit, bool edcaBkMandatory,
     uint8_t edcaBeCWmin, uint16_t edcaBeCWmax, uint8_t edcaBeAifsn, uint16_t edcaBeTxopLimit, bool edcaBeMandatory,
     uint8_t edcaViCWmin, uint16_t edcaViCWmax, uint8_t edcaViAifsn, uint16_t edcaViTxopLimit, bool edcaViMandatory,
@@ -345,8 +343,8 @@ void add_wme_available_service(enum wsa_type wsatype, enum security_result_code 
     memcpy(entry->UserAvailableLifetime, lifetime, 8);
     memcpy(entry->UserAvailableEarliestNextCrlTime, nxt_ctrl_time, 8);
     memcpy(entry->UserAvailableSourceMacAddress, src_mac_addr, MACADDRSIZE);
-    memcpy(entry->UserAvailableProviderServiceIdentifier, psid, PSIDSIZE);
-    memcpy(entry->UserAvailableProviderServiceContext, psc, PSCSIZE);
+    entry->UserAvailableProviderServiceIdentifier = psid;
+    memcpy(entry->UserAvailableProviderServiceContext, psc, psc_len);
     memcpy(entry->UserAvailableIpv6Address, ipv6_addr, IPADDRSIZE);
     entry->UserAvailableServicePort = port;
     memcpy(entry->UserAvailableProviderMacAddress, provider_mac_addr, MACADDRSIZE);
@@ -362,7 +360,7 @@ void add_wme_available_service(enum wsa_type wsatype, enum security_result_code 
     entry->UserAvailableTransmitPowerLevel = tx_pwr_level;
     entry->UserAvailableChannelAccess = channel_access;
 
-    memcpy(entry->UserAvailableAdvertiserIdentifier, advertiser_id, 32);
+    memcpy(entry->UserAvailableAdvertiserIdentifier, advert_id, advert_len);
     entry->UserAvailableTxLatitude = tx_lat;
     entry->UserAvailableTxLongitude = tx_long;
     entry->UserAvailableTxElevation = tx_elev;

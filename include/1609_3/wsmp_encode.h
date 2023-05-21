@@ -23,7 +23,9 @@
 
 #include <stdint.h>
 #include <stdio.h>
+
 #include "../pdu_buf.h"
+#include "wsmp.h"
 
 uint8_t *wsmp_iex_encode(const struct wsmp_iex *curs, size_t *cnt, int *err, int mode);
 uint8_t *wsmp_sii_encode(const struct wsmp_sii *curs, size_t *cnt, int *err, int mode);

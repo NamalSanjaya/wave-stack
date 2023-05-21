@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "../../include/1609_3/wme.h"
-#include "../../include/1609_3/wave_llc.h"
 #include "../../include/1609_3/wsmp.h"
 #include "../../include/pdu_buf.h"
 #include "../../include/1609_3/wsmp_encode.h"

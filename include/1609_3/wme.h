@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "../../include/pdu_buf.h"
+#include "../pdu_buf.h"
 
 #define DEFAULT_CCH 178
 // TODO: Remove this when we support multiple operating classess.
@@ -165,7 +165,7 @@ typedef struct UserAvailableServiceTableEntry{
     uint8_t UserAvailableLifetime[8];
     uint8_t UserAvailableEarliestNextCrlTime[8];
     uint8_t UserAvailableSourceMacAddress[MACADDRSIZE];
-    uint8_t UserAvailableProviderServiceIdentifier[PSIDSIZE];
+    uint32_t UserAvailableProviderServiceIdentifier;
     uint8_t UserAvailableProviderServiceContext[PSCSIZE];
     uint8_t UserAvailableIpv6Address[IPADDRSIZE];
     uint16_t UserAvailableServicePort;
@@ -341,9 +341,9 @@ void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, u
 // methods for UserAvailableService Table
 UserAvailableServiceTable_t *create_wme_available_service_tb();
 void add_wme_available_service(enum wsa_type wsatype, enum security_result_code sec_result_code, uint8_t *gen_time, uint8_t *lifetime, enum service_status service_status,
-    uint8_t *earliest_nxt_Crl_time, uint8_t *src_mac_addr, uint8_t *psid, uint8_t *psc, uint8_t *ipv6_addr, uint16_t port, uint8_t *provider_mac_addr,
+    uint8_t *earliest_nxt_Crl_time, uint8_t *src_mac_addr, uint32_t psid, uint16_t psc_len, uint8_t *psc, uint8_t *ipv6_addr, uint16_t port, uint8_t *provider_mac_addr,
     uint8_t rcpi_threshold, uint8_t rcpi, uint8_t wsa_count_threshold, uint8_t op_class, uint8_t channel_number, bool adaptable, uint8_t data_rate,
-    int8_t tx_pwr_level, enum channel_access channel_access, uint8_t *advertiser_id, int32_t tx_lat, int32_t tx_long, uint16_t tx_elev, uint8_t link_quality,
+    int8_t tx_pwr_level, enum channel_access channel_access, uint16_t advert_len, uint8_t *advert_id, int32_t tx_lat, int32_t tx_long, uint16_t tx_elev, uint8_t link_quality,
     uint8_t edcaBkCWmin, uint16_t edcaBkCWmax, uint8_t edcaBkAifsn, uint16_t edcaBkTxopLimit, bool edcaBkMandatory,
     uint8_t edcaBeCWmin, uint16_t edcaBeCWmax, uint8_t edcaBeAifsn, uint16_t edcaBeTxopLimit, bool edcaBeMandatory,
     uint8_t edcaViCWmin, uint16_t edcaViCWmax, uint8_t edcaViAifsn, uint16_t edcaViTxopLimit, bool edcaViMandatory,

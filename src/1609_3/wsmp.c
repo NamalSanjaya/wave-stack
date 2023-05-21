@@ -19,11 +19,12 @@
  */
 
 #include <sys/socket.h>
+#include <string.h>
 
 #include "../../include/1609_3/wsmp.h"
 #include "../../include/1609_3/wave_llc.h"
 #include "../../include/1609_3/wsmp_encode.h"
-#include "../../include/1609_3/wave_llc.h"
+#include "../../include/1609_3/wsmp_decode.h"
 #include "../../include/fmt_error.h"
 #include "../../include/network.h"
 #include "../../include/controller.h"
@@ -407,25 +408,92 @@ enum confirm_result_code wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot ti
  * 1. In WSA monitoring, once WSMP layer recieved a WSA it will indicate that to WME via this primitive.
  * 2. 
 */
-void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm){
+void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uastb){
      /**
       * For WSA - store data in MIB avaible table
       * For WSM - send the data to upper layer
      */
+     int err[1];
+     if(wsm->psid == WSA_PSID) {
+          /**For WSA
+           * 1. decode WSA and extract fields.
+           * 2. Store in MIB.
+          */
+          printf("WSA Captured...\n");
+          wave_pdu *pdu = create_pdu_buf();
+          add_data_to_pbuf(pdu, wsm->data, wsm->len, err);
+          struct wsmp_wsa *wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
+
+          // Dump values
+          uint8_t gen_time[8] = {1};
+          uint8_t lifetime[8] = {1}; 
+          uint8_t earliest_ctrl_time[8] = {1};
+
+          uint8_t src_mac_addr[6] = {255, 255, 255, 255, 255, 255};  // TODO: Change to correct Source device MAC
+          uint8_t *advert_id = NULL;
+          memcpy(advert_id, "dummy_id", 8);
+          uint16_t advert_id_len = 8;
+          int32_t tx_lat = 1;
+          int32_t tx_long = 1;
+          uint16_t tx_elev = 1;
+          uint8_t link_quality = 1;
+
+          uint8_t edcaCWmin = 1;
+          uint16_t edcaCWmax = 2;
+          uint8_t edcaAifsn = 1;
+          uint16_t edcaTxopLimit = 3;
+          bool edcaMandatory = false;
+          
+          struct wsmp_iex *iex = wsa->iex;
+          if(wsa->use_iex || iex != NULL){
+               advert_id = iex->advert_id.id;
+               advert_id_len = iex->advert_id.len;
+               tx_lat = iex->loc_2d.latitude;
+               tx_long = iex->loc_2d.longitude;
+               tx_elev = iex->loc_3d.elevation;
+          }
+
+          for(uint8_t i=0; i < wsa->sii_count; i++){
+               struct wsmp_sii *sis = wsa->sis[i];
+               if(sis ==  NULL) continue;
+               if(sis->chan_index >= wsa->cii_count) continue;
+
+               if (sis->use_iex){
+                    struct wsmp_iex *sis_iex = sis->iex;
+                    struct wsmp_cii *cis = wsa->cis[sis->chan_index];   // Get the required channel information
+                    if(cis == NULL) continue;
+                    enum channel_access chan_access = alternatingTimeslot1Only;
+                    if(cis->use_iex){
+                         chan_access = (cis->iex)->chan_access;
+                    }
+                    uint16_t port = sis_iex->port[0] | sis_iex->port[1] << 8;
+                    add_wme_available_service(wsa->wsaType, success, gen_time, lifetime, pending, earliest_ctrl_time, src_mac_addr, 
+                         sis->psid, sis_iex->psc.len, sis_iex->psc.psc, sis_iex->ip, port, sis_iex->mac, sis_iex->rcpi_thres, sis_iex->count_thres, sis_iex->count_thres_int,
+                         cis->op_class, cis->chan, cis->adapt, cis->data_rate, cis->tx_pow, chan_access, advert_id_len, advert_id, tx_lat, tx_long, tx_elev, link_quality,
+                         edcaCWmin, edcaCWmax, edcaAifsn, edcaTxopLimit, edcaMandatory, 
+                         edcaCWmin, edcaCWmax, edcaAifsn, edcaTxopLimit, edcaMandatory, 
+                         edcaCWmin, edcaCWmax, edcaAifsn, edcaTxopLimit, edcaMandatory, 
+                         edcaCWmin, edcaCWmax, edcaAifsn, edcaTxopLimit, edcaMandatory, uastb
+                    );         
+               }
+          }
+          return;
+     }
+
      local_resp_t *resp = (local_resp_t *) calloc(1, sizeof(local_resp_t));
-     memcpy(resp->buf, wsm->data, wsm->len);
+     memcpy(resp->buf, wsm->data, wsm->len);  
 
      resp->data_size = wsm->len;
 
      int wave_sock_fd = wave_sock_init(WAVE_SCKFILE);
      if(wave_sock_fd == -1) {
-          printf("err: wave_sock_fd == -1..\n");
+          fmt_error(WAVE_WARN, "Failed to open wave socket with user application(wave_sock_fd == -1)");
           return;
      }
 
-    if (send(wave_sock_fd, resp, sizeof(*resp), 0) == -1) {
-        printf("went wrong..\n");
-        return;
-    }
+     if (send(wave_sock_fd, resp, sizeof(*resp), 0) == -1) {
+          fmt_error(WAVE_WARN, "Unable to send to user application socket.");
+          return;
+     }
     
 }
