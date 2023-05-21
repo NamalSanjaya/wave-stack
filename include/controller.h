@@ -47,4 +47,6 @@ void broadcast_wsa(mib_t *mib_db);
 void send_wsm(WSM_ReqTable_t *wsm_tb);
 void *monitor_wsm_wsa(void *arg);
 
+bool is_hundred_times(); // for demo only
+
 #endif /* _CONTROLLER_H */

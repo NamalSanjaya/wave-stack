@@ -263,3 +263,15 @@ int wave_sock_init(const char *sckfile){
 
     return socket_fd;
 }
+
+// check whether time is in times of 100 milliseconds.
+bool is_hundred_times(){
+    struct timespec currentTime;
+    clock_gettime(CLOCK_REALTIME, &currentTime);
+
+    long milliseconds = currentTime.tv_sec * 1000 + currentTime.tv_nsec / 1000000;
+    if (milliseconds % 100 < 15){
+        return true;
+    }
+    return false;
+}
