@@ -44,7 +44,11 @@ void *timer(){
 }
 
 void *scheduler(void *arg){
+    pthread_t monitor_th;
     mib_t *mib_db = (mib_t *) arg;
+
+    if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
+
     pthread_mutex_lock(&mutex_slot);
     while(1) {
         if(slot == 0){
@@ -68,13 +72,13 @@ void *scheduler(void *arg){
              * its content and all other its data. 
              * 
             */
-        //    send_wsm(mib_db->wrtb);
-            monitor_wsm();
+           send_wsm(mib_db->wrtb);
         }
         slot = slot == 0 ? 1 : 0;
         pthread_cond_wait(&chan_timer, &mutex_slot);
     }
     pthread_mutex_unlock(&mutex_slot);
+    return NULL;
 }
 
 int server_init(const char *sckfile){
@@ -163,7 +167,6 @@ void broadcast_wsa(mib_t *mib_db){
      * 2. Issue WSM_WaveShortMessage.Req() - done
      */ 
     uint8_t wsa_id = 4;
-    int err[1];
     wave_pdu *wsa = get_pdu(wsa_id, mib_db->pdutb);
     if(wsa == NULL){
         return;
@@ -181,7 +184,7 @@ void send_wsm(WSM_ReqTable_t *wsm_tb){
         wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid);
 }
 
-void monitor_wsm(){
+void *monitor_wsm_wsa(void *arg){
     /**
      * Steps (Listening to Air)
      * 1. WSM-WaveShortMessage.ind - when WSMP get a WSA then it indicate it to WME.
@@ -190,17 +193,20 @@ void monitor_wsm(){
      * Schduler need to detect a matching in UserServiceRequest table and UserAvailable table.
      * If there is a match, we tune to that SCH channel in time slot 1, and listen to that data.
      * 
-    */
+     */
+    mib_t *mib_db = (mib_t *) arg;
+    printf("monitoring wsm...wsa....\n");
     wave_pdu *pdu = create_pdu_buf();
     int err[1];
-    size_t total = capture_incoming_data(pdu, err);
+    size_t total = capture_incoming_data(pdu, err);  // only for demo
     if(*err){
         printf("unable to caputer WSM..\n");
-        return;
+        return NULL;
     }
-    printf("Pcap read: %d\n", total);
-    if(total == 0) return;
-    dl_recv(pdu, err);
+    printf("Pcap read: %ld\n", total);
+    if(total == 0) return NULL;
+    dl_recv(pdu,  mib_db->uastb, err);
+    return NULL;
 }
 
 size_t capture_incoming_data(wave_pdu *pdu, int *err){

@@ -1,14 +1,18 @@
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
 
+#include <stddef.h>
+#include <stdint.h>
+#include <pcap.h>
+
 #include "./1609_3/wme.h"
+#include "pdu_buf.h"
 
 #define CH_INTERVAL 2e6  // 46ms
 #define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
 #define WAVE_SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/wave_sckfile"
 
 #define PCAPFILE "/home/sdrns/workspace/fyp_work/demo/test/llc-to-gnuradio.pcap"   // For wireshark packet capturing
-
 
 // This struct use for final demo only. Not a part of stack
 struct PacketData {
@@ -41,6 +45,6 @@ int wave_sock_init(const char *sckfile);
 void hand_over_stack(local_req_t *req, mib_t *mib_db);
 void broadcast_wsa(mib_t *mib_db);
 void send_wsm(WSM_ReqTable_t *wsm_tb);
-void monitor_wsm();
+void *monitor_wsm_wsa(void *arg);
 
 #endif /* _CONTROLLER_H */
