@@ -28,6 +28,7 @@
 #include "../../include/fmt_error.h"
 #include "../../include/network.h"
 #include "../../include/controller.h"
+#include "../../test/include/test_wsmp.h"
 
 void free_iex(struct wsmp_iex *curs) {
      if (curs == NULL)
@@ -424,6 +425,7 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
           add_data_to_pbuf(pdu, wsm->data, wsm->len, err);
           struct wsmp_wsa *wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
 
+          print_wsa(wsa);
           // Dump values
           uint8_t gen_time[8] = {1};
           uint8_t lifetime[8] = {1}; 

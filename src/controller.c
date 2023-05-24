@@ -171,7 +171,7 @@ void broadcast_wsa(mib_t *mib_db){
     if(wsa == NULL){
         return;
     }
-    uint32_t psid = 1;     // TODO: Need to correct
+    uint32_t psid = WSA_PSID;    
     uint8_t peer_mac_addr[6] = {255, 255, 255, 255, 255, 255};
     wsm_waveshortmsg_req(0, time_slot0, 0, 0, 0, 0, 0, 0, wsa->offset, wsa->current, peer_mac_addr, psid);
 }
@@ -179,7 +179,7 @@ void broadcast_wsa(mib_t *mib_db){
 void send_wsm(WSM_ReqTable_t *wsm_tb){
     int err[1];
     WSM_Req_t wsmr = get_nxt_wsm_req(wsm_tb, err);
-    if(*err) return ;
+    if(*err) return;
     wsm_waveshortmsg_req(wsmr.chan_id, wsmr.timeslot, wsmr.data_rate, wsmr.tx_power, wsmr.channel_load, wsmr.info_elem_indicator, wsmr.prority, wsmr.wsm_expire_time,
         wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid);
 }

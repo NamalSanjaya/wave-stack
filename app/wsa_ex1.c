@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
+#include <unistd.h> 
 
 #include <libwave_sock.h>
 
 #define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
 
 int app_send_wsa();
-int app_send_wsm();
+int app_send_wsm(int32_t lat, int32_t longt);
 void store8(uint8_t *buf,uint8_t *i, uint8_t data);
 void store32(uint8_t *buf,uint8_t *i, uint32_t data);
 void print_bin8(uint8_t value);
@@ -17,7 +19,7 @@ int app_send_wsa(){
     enum action act = add;
     uint8_t dest_mac_addr[6] = {255, 255, 255, 255, 255, 255}; // brodcast address
     enum wsa_type wsatype = unsecured;
-    uint32_t psid = 0xC00305;
+    uint32_t psid = 0x8007;
     uint8_t psc[32] = "accident alerts";
     uint8_t psc_len = 15;
     enum channel_access chan_access = alternatingTimeslot1Only;
@@ -39,7 +41,7 @@ int app_send_wsa(){
     return 0;
 }
 
-int app_send_wsm(){
+int app_send_wsm(int32_t lat, int32_t longt){
     uint8_t chan_id = 172; 
     enum time_slot timeslot = time_slot1; 
     uint8_t data_rate = 67; 
@@ -53,8 +55,8 @@ int app_send_wsm(){
     uint16_t len = 64; 
 
     int32_t loc2d_lat, loc2d_longt;
-    loc2d_lat = -19988;
-    loc2d_longt = -29988;
+    loc2d_lat = lat;
+    loc2d_longt = longt;
 
     uint8_t *data = (uint8_t *) calloc(len, sizeof(uint8_t));
 
@@ -104,8 +106,23 @@ void print_binx(uint8_t *buf, size_t size){
     printf("\n");
 }
 
+int main() {
+    int min = -10;    // Minimum value of the range
+    int max = 200;  // Maximum value of the range
 
+    // Seed the random number generator with the current time
+    srand(time(NULL));
+    int count = 0;
+    while (count < 30){
+        // Generate a random number between min and max
+        int randomNum = (rand() % (max - min + 1)) + min;
 
-int main(){
-    return app_send_wsm();
+        int32_t lat = (int32_t) randomNum;
+        int32_t longt = lat + 10;
+        app_send_wsm(lat, longt);
+
+        count++;
+        sleep(1);
+    }
+    return 0;
 }

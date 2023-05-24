@@ -39,8 +39,8 @@ builde: $(OBJS)
 clean:
 	rm -rf *.o *.out executable servexec test/bin/sckfile test/bin/wave_sckfile
 
-## for packet capturing
-sendcapture:
+
+run.stack:
 	sudo ./executable
 
 genexec: $(OBJS)

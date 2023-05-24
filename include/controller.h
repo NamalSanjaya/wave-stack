@@ -8,7 +8,7 @@
 #include "./1609_3/wme.h"
 #include "pdu_buf.h"
 
-#define CH_INTERVAL 2e6  // 46ms
+#define CH_INTERVAL 1e6  // 46ms
 #define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
 #define WAVE_SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/wave_sckfile"
 
