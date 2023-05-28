@@ -113,16 +113,17 @@ int main() {
     // Seed the random number generator with the current time
     srand(time(NULL));
     int count = 0;
-    while (count < 30){
+    while (count < 50){
         // Generate a random number between min and max
         int randomNum = (rand() % (max - min + 1)) + min;
 
         int32_t lat = (int32_t) randomNum;
-        int32_t longt = lat + 10;
+        int32_t longt = (int32_t) count;
         app_send_wsm(lat, longt);
 
         count++;
-        sleep(1);
+        usleep(100000);
     }
+    printf("No.of packet sent: %d\n", count);
     return 0;
 }

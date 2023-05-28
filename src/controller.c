@@ -51,9 +51,10 @@ void *scheduler(void *arg){
 
     pthread_mutex_lock(&mutex_slot);
     while(1) {
+        send_wsm(mib_db->wrtb);
         if(slot == 0){
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            broadcast_wsa(mib_db);
+            // broadcast_wsa(mib_db);
             /**
              * --------  Monitoring WSA ----------
              * UserServiceRequest Table has application services that are interested by the device Higher layers.
@@ -72,7 +73,6 @@ void *scheduler(void *arg){
              * its content and all other its data. 
              * 
             */
-           send_wsm(mib_db->wrtb);
         }
         slot = slot == 0 ? 1 : 0;
         pthread_cond_wait(&chan_timer, &mutex_slot);
