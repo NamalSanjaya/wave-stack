@@ -491,11 +491,10 @@ WSM_Req_t get_nxt_wsm_req(WSM_ReqTable_t *self, int *err){
     //         return;
     //     }
     // }
-
     
     WSM_Req_t wsmr;
     *err = 1;
-    if(self->cur_index >= MAXWSMREQS ||  self->cur_index > self->size) return wsmr;
+    if(self->cur_index >= MAXWSMREQS ||  self->cur_index >= self->size) return wsmr;
     if (self->size == 0 || self->size > MAXWSMREQS)return wsmr;
 
     self->cur_index++;

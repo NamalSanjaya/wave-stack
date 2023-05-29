@@ -83,7 +83,7 @@ gen.demo.wsm1:
 run.demo.wsm1: 
 	@./$(DEMO_WSMEXEC)
 
-# Final gps application demo
+# Final gps application demo tx part
 gen.gpstx:
 	$(CC) -o $(GPS_TX_DEMO_EXEC) $(GPS_TX_APP) $(GPS_TX_LIBS)
 

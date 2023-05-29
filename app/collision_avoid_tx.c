@@ -57,8 +57,8 @@ int main() {
 
                     if (cJSON_IsNumber(latitudeNode) && cJSON_IsNumber(longitudeNode) && cJSON_IsNumber(speedNode)) {
                         // TODO: change data type to doulbe(store 64bits for each). Think about this
-                        int32_t latitude  = (int32_t) latitudeNode->valuedouble;
-                        int32_t longitude = (int32_t) longitudeNode->valuedouble;
+                        int32_t latitude  =  latitudeNode->valuedouble;
+                        int32_t longitude =  longitudeNode->valuedouble;
                         // int speed = speedNode->valueint;
                         
                         /**
@@ -100,7 +100,7 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, char *data) {
     return size * nmemb;
 }
 
-// commmunicate with stack
+// Communicate with stack
 int app_send_wsm(int32_t lat, int32_t longt){
     uint8_t chan_id = 172; 
     enum time_slot timeslot = time_slot1; 
@@ -111,8 +111,8 @@ int app_send_wsm(int32_t lat, int32_t longt){
     uint8_t prority = 1; 
     uint64_t wsm_expire_time = 10; 
 
-    // only for two 32-bits fields
-    uint16_t len = 64; 
+    // only for two 64-bits fields
+    uint16_t len = 128; 
 
     int32_t loc2d_lat, loc2d_longt;
     loc2d_lat = lat;

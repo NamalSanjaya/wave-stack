@@ -113,7 +113,7 @@ int main() {
     // Seed the random number generator with the current time
     srand(time(NULL));
     int count = 0;
-    while (count < 105){
+    while (count < 5){
         // Generate a random number between min and max
         int randomNum = (rand() % (max - min + 1)) + min;
 
