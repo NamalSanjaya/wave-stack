@@ -16,8 +16,20 @@ int main(){
 }
 
 void callback(local_resp_t *resp){
-    print_binx_temp(resp->buf, resp->data_size);
-    printf("\ndata-size: %ld...\n", resp->data_size);
+
+    int32_t lat = 0;
+    int32_t longt = 0;
+
+    // Extract the first 32 bits
+    for (int i = 0; i < 4; i++) {
+        lat |= ( (int32_t) (resp->buf)+i << (24 - (8 * i)));
+    }
+
+    for (int i = 4; i < 8; i++) {
+        longt |= ( (int32_t) (resp->buf)+i << (24 - (8 * (i - 4))));
+    }
+    printf("lat: %d, longt: %d\n", lat, longt);
+    printf("data-size: %ld...\n", resp->data_size);
 }
 
 // print binary format of 1-byte value
