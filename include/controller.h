@@ -12,7 +12,7 @@
 #define SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/sckfile"
 #define WAVE_SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/wave_sckfile"
 
-#define PCAPFILE "/home/suhail/workspace2/fyp/demo/may29/inlab_gpsapp.pcap"   // For wireshark packet capturing
+#define PCAPFILE "/home/suhail/workspace2/fyp/demo/may29/6_inlab_gpsapp.pcap"   // For wireshark packet capturing
 
 // This struct use for final demo only. Not a part of stack
 struct PacketData {

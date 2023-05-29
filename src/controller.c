@@ -195,16 +195,22 @@ void *monitor_wsm_wsa(void *arg){
      * 
      */
     mib_t *mib_db = (mib_t *) arg;
-    wave_pdu *pdu = create_pdu_buf();
-    int err[1];
-    size_t total = capture_incoming_data(pdu, err);  // only for demo
-    if(*err){
-        printf("unable to caputer WSM..\n");
-        return NULL;
+    printf("monitoring wsm...wsa....\n");
+
+    while(1){
+        wave_pdu *pdu = create_pdu_buf();
+        int err[1];
+        size_t total = capture_incoming_data(pdu, err);  // only for demo
+        if(*err){
+            printf("unable to caputer WSM..\n");
+            continue;
+        }
+        printf("Pcap read: %ld\n", total);
+        if(total == 0) continue;
+        dl_recv(pdu,  mib_db->uastb, err);
+        usleep(25000);
     }
-    printf("Pcap read: %ld\n", total);
-    if(total == 0) return NULL;
-    dl_recv(pdu,  mib_db->uastb, err);
+    
     return NULL;
 }
 
