@@ -20,6 +20,7 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, char *data);
 int app_send_wsm(int32_t lat, int32_t longt);
 void store8(uint8_t *buf,uint8_t *i, uint8_t data);
 void store32(uint8_t *buf,uint8_t *i, uint32_t data);
+void store64(uint8_t *buf,uint8_t *i, uint64_t data);
 
 int main() {
     CURL *curl;
@@ -101,7 +102,7 @@ size_t write_callback(void *ptr, size_t size, size_t nmemb, char *data) {
 }
 
 // Communicate with stack
-int app_send_wsm(int32_t lat, int32_t longt){
+int app_send_wsm(double lat, double longt){
     uint8_t chan_id = 172; 
     enum time_slot timeslot = time_slot1; 
     uint8_t data_rate = 67; 
@@ -114,15 +115,15 @@ int app_send_wsm(int32_t lat, int32_t longt){
     // only for two 64-bits fields
     uint16_t len = 128; 
 
-    int32_t loc2d_lat, loc2d_longt;
+    double loc2d_lat, loc2d_longt;
     loc2d_lat = lat;
     loc2d_longt = longt;
 
     uint8_t *data = (uint8_t *) calloc(len, sizeof(uint8_t));
 
     uint8_t indx = 0;
-    store32(data, &indx, loc2d_lat);
-    store32(data, &indx, loc2d_longt);
+    store64(data, &indx, loc2d_lat);
+    store64(data, &indx, loc2d_longt);
 
     uint8_t peer_mac_addr[6] =  {255, 255, 255, 255, 255, 255}; 
     uint32_t psid = 0xC00305;
@@ -145,6 +146,17 @@ void store8(uint8_t *buf,uint8_t *i, uint8_t data){
 }
 
 void store32(uint8_t *buf,uint8_t *i, uint32_t data){
+    store8(buf, i, data >> 24);
+    store8(buf, i, data >> 16);
+    store8(buf, i, data >> 8);
+    store8(buf, i, data);
+}
+
+void store64(uint8_t *buf,uint8_t *i, uint64_t data){
+    store8(buf, i, data >> 56);
+    store8(buf, i, data >> 48);
+    store8(buf, i, data >> 40);
+    store8(buf, i, data >> 32);
     store8(buf, i, data >> 24);
     store8(buf, i, data >> 16);
     store8(buf, i, data >> 8);

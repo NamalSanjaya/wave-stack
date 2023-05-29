@@ -195,7 +195,6 @@ void *monitor_wsm_wsa(void *arg){
      * 
      */
     mib_t *mib_db = (mib_t *) arg;
-    printf("monitoring wsm...wsa....\n");
     wave_pdu *pdu = create_pdu_buf();
     int err[1];
     size_t total = capture_incoming_data(pdu, err);  // only for demo

@@ -17,18 +17,22 @@ int main(){
 
 void callback(local_resp_t *resp){
 
-    int32_t lat = 0;
-    int32_t longt = 0;
+    uint64_t lat64bits = 0;
+    uint64_t longt64bits = 0;
 
-    // Extract the first 32 bits
-    for (int i = 0; i < 4; i++) {
-        lat |= ( (int32_t) (resp->buf)+i << (24 - (8 * i)));
+    // Extract the first 64 bits
+    for (int i = 0; i < 8; i++) {
+        lat64bits |= ( (uint64_t) (resp->buf)+i << (56 - (8 * i)));
     }
 
-    for (int i = 4; i < 8; i++) {
-        longt |= ( (int32_t) (resp->buf)+i << (24 - (8 * (i - 4))));
+    for (int i = 8; i < 16; i++) {
+        longt64bits |= ( (uint64_t) (resp->buf)+i << (56 - (8 * (i - 8))));
     }
-    printf("lat: %d, longt: %d\n", lat, longt);
+
+    double lat = (double) lat64bits;
+    double longt = (double) longt64bits;
+
+    printf("lat: %f, longt: %f\n", lat, longt);
     printf("data-size: %ld...\n", resp->data_size);
 }
 
