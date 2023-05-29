@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <unistd.h> 
 
 #include "../../include/1609_3/wsmp.h"
 #include "../../include/1609_3/wme.h"
@@ -406,13 +407,50 @@ WSM_ReqTable_t *create_wsm_req_tb(){
     tb_obj->filled_index = -1;
     tb_obj->cur_index = 0;
     tb_obj->size = 0;
+    tb_obj->is_locked = false;
     return tb_obj;
 }
 
 void add_wsm_req_tb(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate, int8_t tx_power, uint8_t channel_load, uint8_t info_elem_indicator, 
     uint8_t prority, uint64_t wsm_expire_time, uint16_t len, uint8_t *data, uint8_t *peer_mac_addr, uint32_t psid, WSM_ReqTable_t *self){
+    
+    // int count = 0; 
+    // while(self->is_locked){
+    //     printf("waiting....adding");
+    //     usleep(10000); // 10ms
+    //     count++;
+    //     if(count < 12) {
+    //         fmt_error(WAVE_ERROR, "Unable to unlock WSM_ReqTable_t to add new WSM request");
+    //         return;
+    //     }
+    // }
+
+    self->is_locked = true;
+    // `WSM_ReqTable_t` resizing logic
+    if(self->size >= MAXWSMREQS){
+        if((self->size - self->cur_index) >= MAXWSMREQS){
+            fmt_error(WAVE_WARN, "WSM_ReqTable overflow happend, discarding current packet.");
+            self->is_locked = false;
+            return;
+        }
+        WSM_Req_t *new_table = (WSM_Req_t *) calloc(MAXWSMREQS, sizeof(WSM_Req_t));
+        size_t i = 0;
+        for (i = 0; i < (self->size - self->cur_index); i++){
+            memcpy((new_table) + i, (self->table) + i, sizeof(WSM_Req_t));
+        }
+        self->size = i;
+        self->cur_index = 0;
+        self->filled_index = i-1;
+
+        memcpy(self->table, new_table, MAXWSMREQS);
+        // free(new_table);
+    }
+
     WSM_Req_t *entry = calloc(1, sizeof(WSM_Req_t));
-    if(entry == NULL) return;
+    if(entry == NULL) {
+        self->is_locked = false;
+        return;
+    };
 
     entry->chan_id = chan_id;
     entry->timeslot = timeslot;
@@ -427,33 +465,40 @@ void add_wsm_req_tb(uint8_t chan_id, enum time_slot timeslot, uint8_t data_rate,
     memcpy(entry->peer_mac_addr, peer_mac_addr, 6);
     entry->psid = psid;
 
-    // TODO: This logic has an issue(core dump). We only can send 32 WSM at the moment. 
+    // TODO: This logic has an issue(core dump). We only can send `MAXWSMREQS` WSM at the moment. 
     // We should clear the self->table array and store new data.
-    if(self->size >= MAXWSMREQS){
-        if(self->cur_index > self->filled_index){
-            self->filled_index++;
-            memcpy((self->table) + (self->filled_index), entry, sizeof(WSM_Req_t));
-            self->size++;
-        } else {
-            fmt_error(WAVE_WARN , "Failed to insert WSM request");
-        }
-        free(entry);
-        return;
-    } 
-
+    /**
+     * if(size >= MAXREQS) get only unprocessed data, create new buffer, store unprocessed ones, change indexes as necessary
+     * if(Unprocessed ones >= MAXREQS). now this is a buffer overflow. discard new ones.
+     * 
+    */
     self->filled_index++;
-    memcpy((self->table) + (self->filled_index), entry, sizeof(WSM_Req_t));
+    memcpy((self->table) + (self->size), entry, sizeof(WSM_Req_t));
     self->size++;
     free(entry);
+    self->is_locked = false;
 }
 
 WSM_Req_t get_nxt_wsm_req(WSM_ReqTable_t *self, int *err){
+    // int count = 0; 
+    // while(self->is_locked ){
+    //     printf("waiting....reading");
+    //     usleep(10000); // 10ms
+    //     count++;
+    //     if(count < 12) {
+    //         fmt_error(WAVE_ERROR, "Unable to unlock WSM_ReqTable_t to get next WSM request");
+    //         *err = 1;
+    //         return;
+    //     }
+    // }
+
+    
     WSM_Req_t wsmr;
     *err = 1;
-    if (self->size == 0)return wsmr;
+    if(self->cur_index >= MAXWSMREQS ||  self->cur_index > self->size) return wsmr;
+    if (self->size == 0 || self->size > MAXWSMREQS)return wsmr;
 
     self->cur_index++;
-    self->size--;
     *err = 0;
     return (self->table)[(self->cur_index) - 1];
 }

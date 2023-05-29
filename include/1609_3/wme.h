@@ -9,7 +9,7 @@
 #define DEFAULT_CCH 178
 // TODO: Remove this when we support multiple operating classess.
 #define OPERATING_CLASS 14
-#define MAXWSMREQS 50
+#define MAXWSMREQS 128
 #define WSMDATAMAXSIZE 2048  
 
 // WME MIB tables - All sizes are in bytes
@@ -238,6 +238,7 @@ typedef struct WSM_ReqTable{
     size_t cur_index;      // next index to serve
     size_t filled_index;  // should init to -1;
     size_t size;          // how many WSM requests are at a time
+    bool is_locked;
 } WSM_ReqTable_t;
 
 typedef struct mib {
