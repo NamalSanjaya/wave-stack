@@ -16,6 +16,8 @@
 #define NODE_PATH "/locations.json"
 #define UPDATE_INTERVAL_MS 100
 
+#define MUL_FACTOR 1e7
+
 size_t write_callback(void *ptr, size_t size, size_t nmemb, char *data);
 int app_send_wsm(double lat, double longt);
 void store8(uint8_t *buf,uint8_t *i, uint8_t data);
@@ -112,18 +114,17 @@ int app_send_wsm(double lat, double longt){
     uint8_t prority = 1; 
     uint64_t wsm_expire_time = 10; 
 
-    // only for two 64-bits fields
-    uint16_t len = 128; 
+    // only for two 32-bits fields
+    uint16_t len = 64; 
 
-    uint64_t loc2d_lat, loc2d_longt;
-    loc2d_lat = lat;
-    loc2d_longt = longt;
+    uint32_t loc2d_lat = (uint32_t) (lat*MUL_FACTOR);
+    uint32_t loc2d_longt = (uint32_t) (longt*MUL_FACTOR);
 
     uint8_t *data = (uint8_t *) calloc(len, sizeof(uint8_t));
 
     uint8_t indx = 0;
-    store64(data, &indx, loc2d_lat);
-    store64(data, &indx, loc2d_longt);
+    store32(data, &indx, loc2d_lat);
+    store32(data, &indx, loc2d_longt);
 
     uint8_t peer_mac_addr[6] =  {255, 255, 255, 255, 255, 255}; 
     uint32_t psid = 0xC00305;

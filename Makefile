@@ -45,6 +45,8 @@ builde: $(OBJS)
 clean:
 	rm -rf *.o *.out executable servexec test/bin/sckfile test/bin/wave_sckfile
 
+rmsck:
+	rm -rf test/bin/sckfile test/bin/wave_sckfile
 
 run.stack:
 	sudo ./executable

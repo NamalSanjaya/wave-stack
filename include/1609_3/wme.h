@@ -10,7 +10,7 @@
 // TODO: Remove this when we support multiple operating classess.
 #define OPERATING_CLASS 14
 #define MAXWSMREQS 128
-#define WSMDATAMAXSIZE 16  // just to store two doubles (64bits*2)
+#define WSMDATAMAXSIZE 2048  // just to store two doubles (64bits*2)
 
 // WME MIB tables - All sizes are in bytes
 #define MACADDRSIZE 6 

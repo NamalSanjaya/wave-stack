@@ -40,7 +40,7 @@
 #define MA_UNITDATAX 52
 
 #define DATA_MAXSIZE 2304
-#define WSMDATAMAXSIZE 16      // TODO: Need to check the exact value
+#define WSMDATAMAXSIZE 2048      // TODO: Need to check the exact value
 
 enum action {
     add, delete, change

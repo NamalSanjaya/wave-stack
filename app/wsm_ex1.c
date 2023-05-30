@@ -7,6 +7,7 @@
 
 
 void callback(local_resp_t *resp);
+void callback_old(local_resp_t *resp);
 void print_bin8_temp(uint8_t value);
 void print_binx_temp(uint8_t *buf, size_t size);
 
@@ -17,6 +18,11 @@ int main(){
 }
 
 void callback(local_resp_t *resp){
+    print_binx_temp(resp->buf, resp->data_size);
+    printf("data-size: %ld...\n", resp->data_size);
+}
+
+void callback_old(local_resp_t *resp){
 
     uint64_t lat64bits = 0;
     uint64_t longt64bits = 0;
