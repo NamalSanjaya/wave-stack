@@ -47,7 +47,7 @@ void *scheduler(void *arg){
     pthread_t monitor_th;
     mib_t *mib_db = (mib_t *) arg;
 
-    if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
+    // if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
 
     pthread_mutex_lock(&mutex_slot);
     while(1) {
@@ -264,8 +264,9 @@ int wave_sock_init(const char *sckfile){
     memset(&name, 0, sizeof(name));
     name.sun_family = AF_UNIX;
     strncpy(name.sun_path, sckfile, sizeof(name.sun_path) - 1);
+    printf("here-2");
     if (connect(socket_fd, (struct sockaddr*) &name, sizeof(name)) == -1) return -1;
-
+    printf("here-3");
     return socket_fd;
 }
 

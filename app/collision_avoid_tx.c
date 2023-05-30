@@ -17,7 +17,7 @@
 #define UPDATE_INTERVAL_MS 100
 
 size_t write_callback(void *ptr, size_t size, size_t nmemb, char *data);
-int app_send_wsm(int32_t lat, int32_t longt);
+int app_send_wsm(double lat, double longt);
 void store8(uint8_t *buf,uint8_t *i, uint8_t data);
 void store32(uint8_t *buf,uint8_t *i, uint32_t data);
 void store64(uint8_t *buf,uint8_t *i, uint64_t data);
@@ -58,8 +58,8 @@ int main() {
 
                     if (cJSON_IsNumber(latitudeNode) && cJSON_IsNumber(longitudeNode) && cJSON_IsNumber(speedNode)) {
                         // TODO: change data type to doulbe(store 64bits for each). Think about this
-                        int32_t latitude  =  latitudeNode->valuedouble;
-                        int32_t longitude =  longitudeNode->valuedouble;
+                        double latitude  =  latitudeNode->valuedouble;
+                        double longitude =  longitudeNode->valuedouble;
                         // int speed = speedNode->valueint;
                         
                         /**
@@ -68,8 +68,8 @@ int main() {
                          */
                         app_send_wsm(latitude, longitude);
 
-                        printf("Latitude: %d\n", latitude);
-                        printf("Longitude: %d\n", longitude);
+                        printf("Latitude: %f\n", latitude);
+                        printf("Longitude: %f\n", longitude);
                         // printf("Speed: %d\n", speed);
                     } else {
                         printf("Latitude, longitude, or speed not found or invalid\n");
@@ -115,7 +115,7 @@ int app_send_wsm(double lat, double longt){
     // only for two 64-bits fields
     uint16_t len = 128; 
 
-    double loc2d_lat, loc2d_longt;
+    uint64_t loc2d_lat, loc2d_longt;
     loc2d_lat = lat;
     loc2d_longt = longt;
 

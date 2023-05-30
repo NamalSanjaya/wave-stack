@@ -486,7 +486,7 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
      memcpy(resp->buf, wsm->data, wsm->len);  
 
      resp->data_size = wsm->len;
-
+     
      int wave_sock_fd = wave_sock_init(WAVE_SCKFILE);
      if(wave_sock_fd == -1) {
           fmt_error(WAVE_WARN, "Failed to open wave socket with user application(wave_sock_fd == -1)");
