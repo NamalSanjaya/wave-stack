@@ -14,7 +14,7 @@
 
 #define DATABASE_URL "https://first-app-89614-default-rtdb.firebaseio.com/"
 #define NODE_PATH "/locations.json"
-#define UPDATE_INTERVAL_MS 100
+#define UPDATE_INTERVAL_MS 10
 
 #define MUL_FACTOR 1e7
 
@@ -70,8 +70,8 @@ int main() {
                          */
                         app_send_wsm(latitude, longitude);
 
-                        printf("Latitude: %f\n", latitude);
-                        printf("Longitude: %f\n", longitude);
+                        printf("Latitude: %.7f\n", latitude);
+                        printf("Longitude: %.7f\n", longitude);
                         // printf("Speed: %d\n", speed);
                     } else {
                         printf("Latitude, longitude, or speed not found or invalid\n");
