@@ -38,9 +38,9 @@ int main() {
     if (curl) {
 
         // Send WSA data
-        if(app_send_wsa() < 0) {
-            printf("Unable to send WSA data to wave socket.\n");
-        }
+        // if(app_send_wsa() < 0) {
+        //     printf("Unable to send WSA data to wave socket.\n");
+        // }
 
         while (1) {
             // Create the URL to fetch data from the Firebase Realtime Database
@@ -143,7 +143,7 @@ int app_send_wsm(double lat, double longt){
         printf("failed to communicate with wave socket.\n");
         return -1;
     }
-    printf("GPS data send to wave stack.\n");
+    // printf("GPS data send to wave stack.\n");
     return 0;
 }
 
@@ -169,7 +169,7 @@ int app_send_wsa(){
         printf("failed to communicate with wave socket.\n");
         return -1;
     }
-    printf("WSA data send to wave stack.\n");
+    // printf("WSA data send to wave stack.\n");
     return 0;
 }
 
