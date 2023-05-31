@@ -35,21 +35,6 @@ int main() {
 void action_callback(local_resp_t *resp){
     print_binx_temp(resp->buf, resp->data_size);
     printf("\ndata-size: %ld...\n", resp->data_size);
-
-//     struct Entity entity1 = {43.6532, -79.3832, 10}; // Toronto, Canada
-//     struct Entity entity2 = {51.5074, -0.1278, 20}; // London, UK
-
-//     double distance = vincenty(entity1.latitude, entity1.longitude,
-//                                 entity2.latitude, entity2.longitude);
-// /*
-//     double time_to_collision = distance / (entity2.speed + entity1.speed);
-// */
-//     printf("Distance: %f\n", distance);
-//     if (distance < 10) { // predefined threshold
-//         printf("Collision imminent!\n");
-//     } else {
-//         printf("No collision imminent.\n");
-//     }
 }
 
 // vincenty algorithm to find distance between two gps points 

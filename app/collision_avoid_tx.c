@@ -23,6 +23,7 @@ int app_send_wsm(double lat, double longt);
 void store8(uint8_t *buf,uint8_t *i, uint8_t data);
 void store32(uint8_t *buf,uint8_t *i, uint32_t data);
 void store64(uint8_t *buf,uint8_t *i, uint64_t data);
+int app_send_wsa();
 
 int main() {
     CURL *curl;
@@ -35,6 +36,12 @@ int main() {
     curl = curl_easy_init();
 
     if (curl) {
+
+        // Send WSA data
+        if(app_send_wsa() < 0) {
+            printf("Unable to send WSA data to wave socket.\n");
+        }
+
         while (1) {
             // Create the URL to fetch data from the Firebase Realtime Database
             snprintf(url, sizeof(url), "%s%s", DATABASE_URL, NODE_PATH);
@@ -132,12 +139,37 @@ int app_send_wsm(double lat, double longt){
     int8_t st = app_wsm_waveshortmsg_req(chan_id, timeslot,  data_rate, tx_power, channel_load, info_elem_indicator, prority, 
         wsm_expire_time, len, data, peer_mac_addr, psid, SCKFILE);
 
-    // print_binx(data, len);
     if (st<0){
-        printf("something went wrong...\n");
-        return 1;
+        printf("failed to communicate with wave socket.\n");
+        return -1;
     }
-    printf("--done--\n");
+    printf("GPS data send to wave stack.\n");
+    return 0;
+}
+
+int app_send_wsa(){
+    enum action act = add;
+    uint8_t dest_mac_addr[6] = {255, 255, 255, 255, 255, 255}; // brodcast address
+    enum wsa_type wsatype = unsecured;
+    uint32_t psid = 0x8007;
+    uint8_t psc[32] = "gps-coordinates";
+    uint8_t psc_len = 15;
+    enum channel_access chan_access = alternatingTimeslot1Only;
+    bool ip_service = false;
+    uint8_t ipv6_addr[16] = "";
+    uint16_t service_port = 0;
+    int8_t rcpi_threshold = -13;
+    uint8_t wsa_count_threshold = 8;
+    uint8_t wsa_count_thd_interval = 5;
+
+    int8_t st = app_provider_service_req(act, dest_mac_addr, wsatype, psid, psc, psc_len, chan_access, ip_service, ipv6_addr, service_port, 
+        rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, SCKFILE);
+
+    if (st<0){
+        printf("failed to communicate with wave socket.\n");
+        return -1;
+    }
+    printf("WSA data send to wave stack.\n");
     return 0;
 }
 

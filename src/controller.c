@@ -47,14 +47,13 @@ void *scheduler(void *arg){
     pthread_t monitor_th;
     mib_t *mib_db = (mib_t *) arg;
 
-    // if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
+    if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
 
     pthread_mutex_lock(&mutex_slot);
     while(1) {
-        send_wsm(mib_db->wrtb);
         if(slot == 0){
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            // broadcast_wsa(mib_db);
+            broadcast_wsa(mib_db);
             /**
              * --------  Monitoring WSA ----------
              * UserServiceRequest Table has application services that are interested by the device Higher layers.
@@ -65,6 +64,7 @@ void *scheduler(void *arg){
         } 
         else if(slot == 1) {
             printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
+            send_wsm(mib_db->wrtb);
             /**
              * -------- Send Actual WSM --------
              * WSA has required information about WSM.
@@ -76,6 +76,7 @@ void *scheduler(void *arg){
         }
         slot = slot == 0 ? 1 : 0;
         pthread_cond_wait(&chan_timer, &mutex_slot);
+        usleep(4000);
     }
     pthread_mutex_unlock(&mutex_slot);
     return NULL;
@@ -195,7 +196,6 @@ void *monitor_wsm_wsa(void *arg){
      * 
      */
     mib_t *mib_db = (mib_t *) arg;
-    printf("monitoring wsm...wsa....\n");
 
     while(1){
         wave_pdu *pdu = create_pdu_buf();
@@ -264,9 +264,7 @@ int wave_sock_init(const char *sckfile){
     memset(&name, 0, sizeof(name));
     name.sun_family = AF_UNIX;
     strncpy(name.sun_path, sckfile, sizeof(name.sun_path) - 1);
-    printf("here-2");
     if (connect(socket_fd, (struct sockaddr*) &name, sizeof(name)) == -1) return -1;
-    printf("here-3");
     return socket_fd;
 }
 

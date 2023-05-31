@@ -14,13 +14,13 @@ int main(){
     mib_t *mib_db = create_mib();
 
     // time sync - only for demo
-    // while(1){
-    //     if(is_hundred_times()){
-    //         break;
-    //     }
-    //     printf("wait for 5ms....\n");
-    //     usleep(5000);  // sleep for 5ms
-    // }
+    while(1){
+        if(is_hundred_times()){
+            break;
+        }
+        printf("wait for 5ms....\n");
+        usleep(5000);  // sleep for 5ms
+    }
     printf("Stack started.....\n");
     if(pthread_create(&timer_th, NULL, &timer, NULL) != 0) return 1;
 
