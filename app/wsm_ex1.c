@@ -6,6 +6,8 @@
 #define WAVE_SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/wave_sckfile"
 
 
+#define MUL_FACTOR 1e7
+
 void callback(local_resp_t *resp);
 void callback_old(local_resp_t *resp);
 void print_bin8_temp(uint8_t value);
@@ -17,6 +19,11 @@ int main(){
     wave_sock_listen(sock_fd, callback);
 }
 
+// void callback(local_resp_t *resp){
+//     print_binx_temp(resp->buf, resp->data_size);
+//     printf("data-size: %ld...\n", resp->data_size);
+// }
+
 void callback(local_resp_t *resp){
     print_binx_temp(resp->buf, resp->data_size);
     printf("data-size: %ld...\n", resp->data_size);
@@ -24,22 +31,23 @@ void callback(local_resp_t *resp){
 
 void callback_old(local_resp_t *resp){
 
-    uint64_t lat64bits = 0;
-    uint64_t longt64bits = 0;
+    uint32_t lat = 0;
+    uint32_t longt = 0;
 
     // Extract the first 64 bits
-    for (int i = 0; i < 8; i++) {
-        lat64bits |= ( (uint64_t) (resp->buf)+i << (56 - (8 * i)));
+    for (int i = 0; i < 4; i++) {
+        lat |= ( (uint32_t) *((resp->buf)+i) << (24 - (8 * i)));
     }
 
-    for (int i = 8; i < 16; i++) {
-        longt64bits |= ( (uint64_t) (resp->buf)+i << (56 - (8 * (i - 8))));
+    for (int i = 4; i < 8; i++) {
+        longt |= ( (uint32_t) *((resp->buf)+i) << (24 - (8 * (i - 4))));
     }
 
-    double lat = (double) lat64bits;
-    double longt = (double) longt64bits;
+    double lat_2d = lat/MUL_FACTOR;
+    double longt_2d = longt/MUL_FACTOR;
 
-    printf("lat: %f, longt: %f\n", lat, longt);
+
+    printf("lat: %.7f, longt: %.7f\n", lat_2d, longt_2d);
     printf("data-size: %ld...\n", resp->data_size);
 }
 
