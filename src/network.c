@@ -80,7 +80,7 @@ int alloc_tun(char *dev) {
 
 void write_tun(wave_pdu *pdu){
     int sockfd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ALL));
-    int ifindex = 7;  // tun interface index
+    int ifindex = 5;  // tun interface index
 
     struct sockaddr_ll SendSockAddr;
     SendSockAddr.sll_family   = AF_PACKET;

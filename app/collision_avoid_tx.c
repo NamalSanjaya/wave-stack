@@ -38,9 +38,9 @@ int main() {
     if (curl) {
 
         // Send WSA data
-        if(app_send_wsa() < 0) {
-            printf("Unable to send WSA data to wave socket.\n");
-        }
+        // if(app_send_wsa() < 0) {
+        //     printf("Unable to send WSA data to wave socket.\n");
+        // }
 
         while (1) {
             // Create the URL to fetch data from the Firebase Realtime Database

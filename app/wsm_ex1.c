@@ -2,8 +2,8 @@
 #include <libwave_sock.h>
 #include <stddef.h>
 
-#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
-#define WAVE_SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/wave_sckfile"
+#define SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/sckfile"
+#define WAVE_SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/wave_sckfile"
 
 
 #define MUL_FACTOR 1e7
