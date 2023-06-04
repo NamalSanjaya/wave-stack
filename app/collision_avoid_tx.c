@@ -80,6 +80,7 @@ int main() {
                         printf("Latitude: %.7f\n", latitude);
                         printf("Longitude: %.7f\n", longitude);
                         // printf("Speed: %d\n", speed);
+                        printf("---------------------------------------------\n");
                     } else {
                         printf("Latitude, longitude, or speed not found or invalid\n");
                     }
