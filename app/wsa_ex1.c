@@ -34,10 +34,10 @@ int app_send_wsa(){
         rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, SCKFILE);
 
     if (st<0){
-        printf("something went wrong...\n");
+        printf("failed to send provider service request to stack\n");
         return 1;
     }
-    printf("--done--\n");
+    printf("successfully send the provider service request to stack\n");
     return 0;
 }
 
@@ -72,10 +72,10 @@ int app_send_wsm(int32_t lat, int32_t longt){
 
     // print_binx(data, len);
     if (st<0){
-        printf("something went wrong...\n");
+         printf("failed to send WSM request to stack\n");
         return 1;
     }
-    printf("--done--\n");
+    printf("successfully send the WSM request to stack\n");
     return 0;
 }
 
@@ -127,3 +127,9 @@ int main() {
     printf("No.of packet sent: %d\n", count);
     return 0;
 }
+
+// // demo for WSA
+// int main(){
+//     app_send_wsa();
+//     return 0;
+// }
