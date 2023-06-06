@@ -27,16 +27,19 @@ DEMO_APP = app/wsa_ex1.c
 DEMO_WSMAPP = app/wsm_ex1.c
 GPS_TX_APP = app/collision_avoid_tx.c
 GPS_RX_APP = app/collision_avoid_rx.c
+FINAL_RX_APP = app/demo_rx.c
 
 DEMO_LIBS = -lwave_sock
 GPS_TX_LIBS = -lwave_sock -lcurl -lcjson
 GPS_RX_LIBS = -lwave_sock -lm
+FINAL_RX_LIBS = -lwave_sock -lcurl -lcjson -lm -lpthread
 
 DEMO_WSAEXEC = app/bin/wsaexec
 DEMO_WSMEXEC = app/bin/wsmexec
 
 GPS_TX_DEMO_EXEC = app/bin/gpsexec
 GPS_RX_DEMO_EXEC = app/bin/gpsrxexec
+FINAL_RX_DEMO_EXEC = app/bin/finalrxexec
 
 buildo: $(SRC) $(HDR)
 	$(CC) $(CFLAGS) -c $(SRC) 
@@ -100,6 +103,17 @@ gen.gpsrx:
 
 run.gpsrx:
 	@./$(GPS_RX_DEMO_EXEC)
+
+gen.demorx:
+	$(CC) $(FINAL_RX_APP) -o $(FINAL_RX_DEMO_EXEC) `pkg-config --cflags --libs gtk+-3.0` $(FINAL_RX_LIBS)
+
+# gcc UI.c -o UI `pkg-config --cflags --libs gtk+-3.0` -lcurl -lcjson -pthread
+
+run.demorx:
+	@./$(FINAL_RX_DEMO_EXEC)
+
+clean.demorx:
+	rm -rf app/bin/finalrxexec
 
 # Related to stack main function
 main.o:

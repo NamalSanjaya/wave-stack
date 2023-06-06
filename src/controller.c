@@ -51,7 +51,7 @@ void *scheduler(void *arg){
 
     pthread_mutex_lock(&mutex_slot);
     while(1) {
-        send_wsm(mib_db->wrtb);
+        // send_wsm(mib_db->wrtb);
         if(slot == 0){
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
             // broadcast_wsa(mib_db);
@@ -209,7 +209,7 @@ void *monitor_wsm_wsa(void *arg){
         // printf("Pcap read: %ld\n", total);
         if(total == 0) continue;
         dl_recv(pdu,  mib_db->uastb, err);
-        usleep(25000);
+        usleep(10000);
     }
     
     return NULL;

@@ -14,7 +14,7 @@
 
 #define EARTH_RADIUS 6371 // Earth's radius in km
 
-#define THERSHOLD 20
+#define THERSHOLD 10
 #define MUL_FACTOR 1e7
 
 struct Entity {
@@ -23,7 +23,7 @@ struct Entity {
     double speed;
 };
 
-double vincenty(double lat1, double lon1, double lat2, double lon2) ;
+double vincenty(double lat1, double lon1, double lat2, double lon2);
 void callback(local_resp_t *resp);
 
 int main() {
@@ -53,8 +53,8 @@ void callback(local_resp_t *resp){
     double lat_2d = lat/MUL_FACTOR;
     double longt_2d = longt/MUL_FACTOR;
 
-    double rx_fix_lat = 6.7967400;
-    double rx_fix_longt = 79.9012834;
+    double rx_fix_lat = 6.796876;
+    double rx_fix_longt = 79.901243;
 
     struct Entity entity1 = {rx_fix_lat, rx_fix_longt, 10}; // Rx fix coordinates
     struct Entity entity2 = {lat_2d, longt_2d, 20}; // moving TX coordinates
