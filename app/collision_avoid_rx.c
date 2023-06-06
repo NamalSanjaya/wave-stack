@@ -9,10 +9,13 @@
 // header file to communicate with stack
 #include <libwave_sock.h>
 
-#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
-#define WAVE_SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/wave_sckfile"
+#define SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/sckfile"
+#define WAVE_SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/wave_sckfile"
 
 #define EARTH_RADIUS 6371 // Earth's radius in km
+
+#define THERSHOLD 20
+#define MUL_FACTOR 1e7
 
 struct Entity {
     double latitude;
@@ -21,20 +24,52 @@ struct Entity {
 };
 
 double vincenty(double lat1, double lon1, double lat2, double lon2) ;
-void action_callback(local_resp_t *resp);
+void callback(local_resp_t *resp);
 
 int main() {
 
     int sock_fd = wave_sock_open(WAVE_SCKFILE);
     if(sock_fd == -1) return 1;
-    wave_sock_listen(sock_fd, action_callback);
+    wave_sock_listen(sock_fd, callback);
 
     return 0;
 }
 
-void action_callback(local_resp_t *resp){
-    print_binx_temp(resp->buf, resp->data_size);
-    printf("\ndata-size: %ld...\n", resp->data_size);
+void callback(local_resp_t *resp){
+
+    uint32_t lat = 0;
+    uint32_t longt = 0;
+
+    // Extract the first 32 bits
+    for (int i = 0; i < 4; i++) {
+        lat |= ( (uint32_t) *((resp->buf)+i) << (24 - (8 * i)));
+    }
+
+    // Extract the second 32 bits
+    for (int i = 4; i < 8; i++) {
+        longt |= ( (uint32_t) *((resp->buf)+i) << (24 - (8 * (i - 4))));
+    }
+
+    double lat_2d = lat/MUL_FACTOR;
+    double longt_2d = longt/MUL_FACTOR;
+
+    double rx_fix_lat = 6.7967400;
+    double rx_fix_longt = 79.9012834;
+
+    struct Entity entity1 = {rx_fix_lat, rx_fix_longt, 10}; // Rx fix coordinates
+    struct Entity entity2 = {lat_2d, longt_2d, 20}; // moving TX coordinates
+
+    double distance = vincenty(entity1.latitude, entity1.longitude,
+                                entity2.latitude, entity2.longitude);
+/*
+    double time_to_collision = distance / (entity2.speed + entity1.speed);
+*/
+    printf("Distance: %f\n", distance);
+    if (distance < THERSHOLD) { // predefined threshold
+        printf("Collision detected!\n");
+    } else {
+        printf("No collision detected.\n");
+    }
 }
 
 // vincenty algorithm to find distance between two gps points 
