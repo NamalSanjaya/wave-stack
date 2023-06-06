@@ -7,3 +7,4 @@ lib/bin
 executable
 servexec
 app/bin
+*.png
