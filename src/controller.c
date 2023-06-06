@@ -12,6 +12,7 @@
 #include "../include/controller.h"
 #include "../include/1609_3/wme.h"
 #include "../include/pdu_buf.h"
+#include "../include/fmt_error.h"
 #include "../include/1609_3/wsmp.h"
 #include "../include/1609_3/wave_llc.h"
 
@@ -51,10 +52,30 @@ void *scheduler(void *arg){
 
     pthread_mutex_lock(&mutex_slot);
     while(1) {
-        send_wsm(mib_db->wrtb);
         if(slot == 0){
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            // broadcast_wsa(mib_db);
+            broadcast_wsa(mib_db);
+            // Check whether new WSA is available in UserAvailableService table
+            if( (mib_db->uastb)->unprocessed_servs > 0 ){
+
+                for (size_t i = 0; i < (mib_db->usrtb)->size; i++){
+                    UserAvailableServiceTableEntry_t uast_entry = ( (mib_db->uastb)->table)[i];
+                    for (size_t j = 0; j < (mib_db->usrtb)->size; j++){
+                        UserServiceRequestTableEntry usrtb_entry = ((mib_db->usrtb)->table)[j];
+                        // Only rely on PSID.
+                        if(uast_entry.UserAvailableProviderServiceIdentifier == usrtb_entry.UserServiceRequestProviderServiceIdentifier){
+                            /**
+                             * Application interest found in WSA. 
+                             * 1. Switch to relavent channel. (issue MLMEX-CHSTART.req)
+                             * 2. Change Service Status (issue WME-set.req())
+                             * 3. In time slot 1, need to listen to relavent data.
+                            */
+                            printf("Application interest found in WSA with psid %0x", usrtb_entry.UserServiceRequestProviderServiceIdentifier);
+                        }
+                    }
+                }
+            }
+
             /**
              * --------  Monitoring WSA ----------
              * UserServiceRequest Table has application services that are interested by the device Higher layers.
@@ -65,7 +86,7 @@ void *scheduler(void *arg){
         } 
         else if(slot == 1) {
             printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
-            
+            send_wsm(mib_db->wrtb);
             /**
              * -------- Send Actual WSM --------
              * WSA has required information about WSM.
@@ -156,6 +177,7 @@ void hand_over_stack(local_req_t *req, mib_t *mib_db){
     }
 
     if (req->id == 13){
+        // Upper layer is interested on some application service. This info will store in UserServiceReq table.
         app_UserServiceReqEntry_t usre = req->usre;
         wme_user_service_req(local_service_index, usre.act, usre.user_req_type, usre.psid, usre.psc, usre.wsatype, usre.channel_id, usre.src_mac_addr, usre.advertiser_id, usre.link_quality, usre.immediate_access, mib_db->usrtb);
         return;
@@ -190,7 +212,7 @@ void *monitor_wsm_wsa(void *arg){
     /**
      * Steps (Listening to Air)
      * 1. WSM-WaveShortMessage.ind - when WSMP get a WSA then it indicate it to WME.
-     * 2. Set Available Sevice Info in MIB.
+     * 2. Set UserAvailableService Info in MIB.
      * Note: 
      * Schduler need to detect a matching in UserServiceRequest table and UserAvailable table.
      * If there is a match, we tune to that SCH channel in time slot 1, and listen to that data.

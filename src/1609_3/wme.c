@@ -326,7 +326,7 @@ uint8_t find_suitable_channel(){
     return 172;
 }
 
-enum wme_service_confirm wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint8_t *psid, uint8_t *psc,
+enum wme_service_confirm wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint32_t psid, uint8_t *psc,
     enum wsa_type wsatype, uint8_t channel_id, uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t link_quality, uint8_t immediate_access,
     UserServiceRequestTable *user_serv_tb){
     /**

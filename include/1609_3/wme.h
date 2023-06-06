@@ -137,7 +137,7 @@ typedef struct ProviderChannelInfoTable {
 typedef struct UserServiceRequestTableEntry {
     uint16_t UserServiceRequestTableIndex;
     enum user_request_type  UserServiceRequestType;
-    uint8_t UserServiceRequestProviderServiceIdentifier[8];
+    uint32_t UserServiceRequestProviderServiceIdentifier;
     uint8_t UserServiceRequestProviderServiceContext[32];
     uint8_t UserServiceRequestPriority;
     enum wsa_type UserServiceRequestWsaTypes;
@@ -216,6 +216,7 @@ typedef struct UserAvailableServiceTable {
     uint8_t oid[32];
     UserAvailableServiceTableEntry_t table[MAXAVAILABLESERVICES];
     size_t size;
+    size_t unprocessed_servs;
 } UserAvailableServiceTable_t;
 
 typedef struct WSM_Req {
@@ -335,7 +336,7 @@ void show_wme_chan_info(size_t indx, ProviderChannelInfoTable *self);
 void show_wme_chan_info_entry(ProviderChannelInfoTableEntry *entry);
 
 UserServiceRequestTable *create_wme_user_serv_req_tb();
-void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, uint8_t *psc, uint8_t priority, enum wsa_type wsatype,
+void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint32_t psid, uint8_t *psc, uint8_t priority, enum wsa_type wsatype,
     uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t op_class, uint8_t channel_no, uint8_t link_quality, uint8_t immediate_access, 
     enum service_status serv_status, UserServiceRequestTable *self);
 
@@ -349,6 +350,7 @@ void add_wme_available_service(enum wsa_type wsatype, enum security_result_code 
     uint8_t edcaBeCWmin, uint16_t edcaBeCWmax, uint8_t edcaBeAifsn, uint16_t edcaBeTxopLimit, bool edcaBeMandatory,
     uint8_t edcaViCWmin, uint16_t edcaViCWmax, uint8_t edcaViAifsn, uint16_t edcaViTxopLimit, bool edcaViMandatory,
     uint8_t edcaVoCWmin, uint16_t edcaVoCWmax, uint8_t edcaVoAifsn, uint16_t edcaVoTxopLimit, bool edcaVoMandatory, UserAvailableServiceTable_t *self);
+UserAvailableServiceTableEntry_t get_current_wsa(UserAvailableServiceTable_t *self, int *err);
 
 // WME related methods
 struct wsmp_iex *create_wsa_iex(uint8_t repeat_rate, bool use_loc2d,  uint32_t loc2d_latitude, uint32_t loc2d_longitude, bool use_loc3d,
@@ -374,7 +376,7 @@ enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, 
 
 uint8_t find_suitable_channel();
 
-enum wme_service_confirm wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint8_t *psid, uint8_t *psc,
+enum wme_service_confirm wme_user_service_req(uint8_t local_service_indx, enum action act, enum user_request_type user_req_type, uint32_t psid, uint8_t *psc,
     enum wsa_type wsatype, uint8_t channel_id, uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t link_quality, uint8_t immediate_access,
     UserServiceRequestTable *user_serv_tb);
 

@@ -282,7 +282,7 @@ UserServiceRequestTable *create_wme_user_serv_req_tb(){
     return tb_obj;
 }
 
-void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, uint8_t *psc, uint8_t priority, enum wsa_type wsatype,
+void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint32_t psid, uint8_t *psc, uint8_t priority, enum wsa_type wsatype,
     uint8_t *src_mac_addr, uint8_t *advert_id, uint8_t op_class, uint8_t channel_no, uint8_t link_quality, uint8_t immediate_access, 
     enum service_status serv_status, UserServiceRequestTable *self){
     UserServiceRequestTableEntry *entry = calloc(1, sizeof(UserServiceRequestTableEntry));
@@ -290,7 +290,8 @@ void add_wme_user_serv_req_tb(enum user_request_type  req_type, uint8_t *psid, u
     
     entry->UserServiceRequestTableIndex = self->size;
     entry->UserServiceRequestType = req_type;
-    memcpy(entry->UserServiceRequestProviderServiceIdentifier, psid, 8); // TODO: PSID is variable length
+    entry->UserServiceRequestProviderServiceIdentifier = psid;
+    // memcpy(entry->UserServiceRequestProviderServiceIdentifier, psid, 8); // TODO: PSID is variable length
     memcpy(entry->UserServiceRequestProviderServiceContext, psc, 32);
 
     entry->UserServiceRequestPriority = priority;
@@ -319,6 +320,7 @@ UserAvailableServiceTable_t *create_wme_available_service_tb(){
     uint8_t oid[32] = "1.3.111.2.1609.3.4.2.3.1";  // change
     memcpy(tb_obj->oid, oid, 32) ;
     tb_obj->size = 0;
+    tb_obj->unprocessed_servs = 0;
     return tb_obj;
 }
 
@@ -394,8 +396,20 @@ void add_wme_available_service(enum wsa_type wsatype, enum security_result_code 
 
     memcpy((self->table) + (self->size), entry, sizeof(UserAvailableServiceTableEntry_t));
     self->size++;
+    self->unprocessed_servs++;
 
     free(entry);
+}
+
+// Get current WSA
+UserAvailableServiceTableEntry_t get_current_wsa(UserAvailableServiceTable_t *self, int *err){
+    UserAvailableServiceTableEntry_t uaste;
+    *err = 0;
+    if(self->size > MAXAVAILABLESERVICES){
+        *err = 1;
+        return uaste;
+    }
+    return (self->table)[(self->size) - 1];
 }
 
 // methods for Requested WSMs

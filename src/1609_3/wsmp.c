@@ -411,14 +411,14 @@ enum confirm_result_code wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot ti
 */
 void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uastb){
      /**
-      * For WSA - store data in MIB avaible table
-      * For WSM - send the data to upper layer
+      * For WSA - Store data in MIB UserAvailableService Table
+      * For WSM - Send the data to upper layer
      */
      int err[1];
      if(wsm->psid == WSA_PSID) {
           /**For WSA
            * 1. decode WSA and extract fields.
-           * 2. Store in MIB.
+           * 2. Store in UserAvailableService Table.
           */
           printf("WSA Captured...\n");
           wave_pdu *pdu = create_pdu_buf();
@@ -469,6 +469,7 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
                          chan_access = (cis->iex)->chan_access;
                     }
                     uint16_t port = sis_iex->port[0] | sis_iex->port[1] << 8;
+                    // Once we recieved a WSA, it will be stored in UserAvailableService table.
                     add_wme_available_service(wsa->wsaType, success, gen_time, lifetime, pending, earliest_ctrl_time, src_mac_addr, 
                          sis->psid, sis_iex->psc.len, sis_iex->psc.psc, sis_iex->ip, port, sis_iex->mac, sis_iex->rcpi_thres, sis_iex->count_thres, sis_iex->count_thres_int,
                          cis->op_class, cis->chan, cis->adapt, cis->data_rate, cis->tx_pow, chan_access, advert_id_len, advert_id, tx_lat, tx_long, tx_elev, link_quality,
@@ -476,7 +477,7 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
                          edcaCWmin, edcaCWmax, edcaAifsn, edcaTxopLimit, edcaMandatory, 
                          edcaCWmin, edcaCWmax, edcaAifsn, edcaTxopLimit, edcaMandatory, 
                          edcaCWmin, edcaCWmax, edcaAifsn, edcaTxopLimit, edcaMandatory, uastb
-                    );         
+                    );
                }
           }
           return;
