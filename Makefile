@@ -26,14 +26,18 @@ SOCKOS=lib/bin/so/libwave_sock.so
 DEMO_APP = app/wsa_ex1.c
 DEMO_WSMAPP = app/wsm_ex1.c
 GPS_TX_APP = app/collision_avoid_tx.c
+FINAL_TX_APP = app/demo_tx.c
 
 DEMO_LIBS = -lwave_sock
 GPS_TX_LIBS = -lwave_sock -lcurl -lcjson
+FINAL_TX_LIBS = -lwave_sock -lm
 
 DEMO_WSAEXEC = app/bin/wsaexec
 DEMO_WSMEXEC = app/bin/wsmexec
 
 GPS_TX_DEMO_EXEC = app/bin/gpsexec
+
+FINAL_TX_DEMO_EXEC = app/bin/finaltxexec
 
 buildo: $(SRC) $(HDR)
 	$(CC) $(CFLAGS) -c $(SRC) 
@@ -91,6 +95,12 @@ gen.gpstx:
 
 run.gpstx:
 	@./$(GPS_TX_DEMO_EXEC)
+
+gen.demotx:
+	$(CC) -o $(FINAL_TX_DEMO_EXEC) $(FINAL_TX_APP) $(FINAL_TX_LIBS)
+
+run.demotx:
+	@./$(FINAL_TX_DEMO_EXEC)
 
 
 # Related to stack main function
