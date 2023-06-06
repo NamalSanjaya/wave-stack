@@ -15,8 +15,8 @@ void store8(uint8_t *buf,uint8_t *i, uint8_t data);
 void store32(uint8_t *buf,uint8_t *i, uint32_t data);
 
 int main(){
-    double tx_fix_lat = 6.7967400;
-    double tx_fix_longt = 79.9012834;
+    double tx_fix_lat = 6.796876;
+    double tx_fix_longt = 79.901243;
     while(1){
         app_send_wsm(tx_fix_lat, tx_fix_longt);
         usleep(80000);
