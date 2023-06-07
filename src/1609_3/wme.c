@@ -313,6 +313,7 @@ enum wme_service_confirm wme_provider_service_req(uint16_t local_service_index, 
             return rejected_unspecified;
         }
         (mib_db->pdutb)->wsa_store[wsa_id] = pdu;
+        printf("Successfully buffered the provider service request with psid = %0x.\n", psid);
     }
 
     // else if(act == change){}

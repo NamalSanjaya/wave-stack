@@ -34,10 +34,10 @@ int app_send_wsa(){
         rcpi_threshold, wsa_count_threshold, wsa_count_thd_interval, SCKFILE);
 
     if (st<0){
-        printf("failed to send provider service request to stack\n");
+        printf("Failed to send provider service request to stack.\n");
         return 1;
     }
-    printf("successfully send the provider service request to stack\n");
+    printf("Successfully send the provider service request to stack.\n");
     return 0;
 }
 

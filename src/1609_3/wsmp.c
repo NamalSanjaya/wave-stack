@@ -424,8 +424,9 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
           wave_pdu *pdu = create_pdu_buf();
           add_data_to_pbuf(pdu, wsm->data, wsm->len, err);
           struct wsmp_wsa *wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
+          fmt_info("Succefully decode the data WSMP.");
 
-          print_wsa(wsa);
+          // print_wsa(wsa);
           // Dump values
           uint8_t gen_time[8] = {1};
           uint8_t lifetime[8] = {1}; 
@@ -454,7 +455,7 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
                tx_long = iex->loc_2d.longitude;
                tx_elev = iex->loc_3d.elevation;
           }
-
+          fmt_info("Hand over WSA data processing to WME layer.");
           for(uint8_t i=0; i < wsa->sii_count; i++){
                struct wsmp_sii *sis = wsa->sis[i];
                if(sis ==  NULL) continue;
@@ -480,6 +481,7 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
                     );
                }
           }
+          
           return;
      }
 

@@ -146,7 +146,7 @@ int8_t app_provider_service_req(enum action act, uint8_t *dest_mac_addr, enum ws
     int socket_fd = init_socket(sckfile);
 
     if (send(socket_fd, req, sizeof(*req), 0) == -1) {
-        printf("went wrong..\n");
+        printf("Failed to communicate with stack to hand over the Provider Service Request.\n");
         return -1;
     }
     // Close the socket

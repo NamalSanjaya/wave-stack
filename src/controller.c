@@ -48,6 +48,43 @@ void *scheduler(void *arg){
     pthread_t monitor_th;
     mib_t *mib_db = (mib_t *) arg;
 
+    // Loading default channel configurations
+    uint8_t op_class = 10;
+    uint8_t chan_no = 172;
+    bool is_adaptable = true;
+    uint8_t data_rate = 23;
+    int8_t tx_power_level = 18;
+
+    uint8_t be_cwmin = 2;
+    uint32_t be_cwmax = 2784;
+    uint8_t be_aifsn = 202;
+    uint32_t be_txop_limit = 10001;
+    bool be_mand = true;
+
+    uint8_t bk_cwmin = 1;
+    uint32_t bk_cwmax = 1340;
+    uint8_t bk_aifsn = 201;
+    uint32_t bk_txop_limit = 10002;
+    bool bk_mand = false;
+
+    uint8_t vi_cwmin = 3;
+    uint32_t vi_cwmax = 1026;
+    uint8_t vi_aifsn = 203;
+    uint32_t vi_txop_limit = 10003;
+    bool vi_mand = false;
+
+    uint8_t vo_cwmin = 4;
+    uint32_t vo_cwmax = 1587;
+    uint8_t vo_aifsn = 204;
+    uint32_t vo_txop_limit = 10004;
+    bool vo_mand = true;
+
+    add_wme_prv_chan_tb(op_class, chan_no, is_adaptable, data_rate, tx_power_level, 
+        be_cwmin, be_cwmax, be_aifsn, be_txop_limit, be_mand,
+        bk_cwmin, bk_cwmax, bk_aifsn, bk_txop_limit, bk_mand,
+        vi_cwmin, vi_cwmax, vi_aifsn, vi_txop_limit, vi_mand,
+        vo_cwmin, vo_cwmax, vo_aifsn, vo_txop_limit, vo_mand, mib_db->pcitb);
+
     if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
 
     pthread_mutex_lock(&mutex_slot);
@@ -57,7 +94,7 @@ void *scheduler(void *arg){
             broadcast_wsa(mib_db);
             // Check whether new WSA is available in UserAvailableService table
             if( (mib_db->uastb)->unprocessed_servs > 0 ){
-
+                fmt_info("Working on unprocessed requests in UserAvailableService table.");
                 for (size_t i = 0; i < (mib_db->usrtb)->size; i++){
                     UserAvailableServiceTableEntry_t uast_entry = ( (mib_db->uastb)->table)[i];
                     for (size_t j = 0; j < (mib_db->usrtb)->size; j++){
@@ -169,6 +206,7 @@ void hand_over_stack(local_req_t *req, mib_t *mib_db){
 
     if(req->id == 11){
         app_ProviderServiceReqEntry psre = req->psre;
+        printf("Start working on provider service request with psid = %0x.\n", psre.psid);
         wme_provider_service_req(local_service_index, psre.act, dest_mac_addr, psre.wsatype, psre.psid, psre.psc, sch_id,
             DEFAULT_CCH, psre.chan_access, repeat_rate, psre.ip_service, psre.ipv6_addr, psre.service_port, provider_mac_addr,
             psre.rcpi_threshold, psre.wsa_count_threshold, psre.wsa_count_thd_interval, info_elements_indicator, sign_lifetime, mib_db);
@@ -225,7 +263,7 @@ void *monitor_wsm_wsa(void *arg){
         int err[1];
         size_t total = capture_incoming_data(pdu, err);  // only for demo
         if(*err){
-            printf("unable to caputer WSM..\n");
+            printf("unable to capture data.\n");
             continue;
         }
         // printf("Pcap read: %ld\n", total);

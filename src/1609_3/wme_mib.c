@@ -398,6 +398,7 @@ void add_wme_available_service(enum wsa_type wsatype, enum security_result_code 
     self->size++;
     self->unprocessed_servs++;
 
+    fmt_info("Succefully store WSA services in UserAvailableService table.");
     free(entry);
 }
 
