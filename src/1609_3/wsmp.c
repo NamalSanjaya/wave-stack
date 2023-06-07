@@ -420,11 +420,11 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
            * 1. decode WSA and extract fields.
            * 2. Store in UserAvailableService Table.
           */
-          printf("WSA Captured...\n");
+          fmt_info("WSM captured at WSMP layer.");
           wave_pdu *pdu = create_pdu_buf();
           add_data_to_pbuf(pdu, wsm->data, wsm->len, err);
           struct wsmp_wsa *wsa = wsmp_wsa_decode(pdu, err, WSMP_STRICT);
-          fmt_info("Succefully decode the data WSMP.");
+          fmt_info("Succefully decode the WSA data at WSMP.");
 
           // print_wsa(wsa);
           // Dump values
@@ -433,8 +433,7 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
           uint8_t earliest_ctrl_time[8] = {1};
 
           uint8_t src_mac_addr[6] = {255, 255, 255, 255, 255, 255};  // TODO: Change to correct Source device MAC
-          uint8_t *advert_id = NULL;
-          memcpy(advert_id, "dummy_id", 8);
+          uint8_t advert_id[32] = "dummy-id";
           uint16_t advert_id_len = 8;
           int32_t tx_lat = 1;
           int32_t tx_long = 1;
@@ -449,13 +448,13 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
           
           struct wsmp_iex *iex = wsa->iex;
           if(wsa->use_iex || iex != NULL){
-               advert_id = iex->advert_id.id;
+               memcpy(advert_id, iex->advert_id.id, advert_id_len);
                advert_id_len = iex->advert_id.len;
                tx_lat = iex->loc_2d.latitude;
                tx_long = iex->loc_2d.longitude;
                tx_elev = iex->loc_3d.elevation;
           }
-          fmt_info("Hand over WSA data processing to WME layer.");
+          fmt_info("Hand over WSA data to WME layer.");
           for(uint8_t i=0; i < wsa->sii_count; i++){
                struct wsmp_sii *sis = wsa->sis[i];
                if(sis ==  NULL) continue;

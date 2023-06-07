@@ -229,7 +229,7 @@ ProviderChannelInfoTableEntry *get_wme_prv_chan_entry(size_t index, ProviderChan
 uint8_t get_chan_index(uint8_t chan_no, ProviderChannelInfoTable *self){
     for (uint8_t i = 0; i < self->size; i++){
         if((self->table)[i].ProviderChannelInfoChannelNumber == chan_no){
-            return i+1;
+            return i;
         }
     }
     return 0;

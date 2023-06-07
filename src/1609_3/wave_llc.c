@@ -129,6 +129,7 @@ void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, UserAvailabl
     // Decode wsm
     // WSM-WaveShortMessage.indication(...., wsm_payload,...)
     struct wsmp_wsm *wsm = wsmp_wsm_decode(pdu, err, WSMP_STRICT);
+    fmt_info("Succefully decode the data LLC");
     free_pbuf(pdu);
     wsm_waveshortmsg_ind(wsm, uastb);
 }

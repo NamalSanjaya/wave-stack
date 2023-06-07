@@ -90,6 +90,7 @@ void *scheduler(void *arg){
     pthread_mutex_lock(&mutex_slot);
     while(1) {
         if(slot == 0){
+            printf("---------------------------------------------------------------\n");
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
             broadcast_wsa(mib_db);
             // Check whether new WSA is available in UserAvailableService table
@@ -122,7 +123,8 @@ void *scheduler(void *arg){
             */
         } 
         else if(slot == 1) {
-            printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
+            // printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
+            // printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
             send_wsm(mib_db->wrtb);
             /**
              * -------- Send Actual WSM --------
@@ -268,8 +270,9 @@ void *monitor_wsm_wsa(void *arg){
         }
         // printf("Pcap read: %ld\n", total);
         if(total == 0) continue;
+        if(slot == 1) continue;
         dl_recv(pdu,  mib_db->uastb, err);
-        usleep(25000);
+        usleep(100000);
     }
     
     return NULL;
@@ -299,7 +302,7 @@ size_t capture_incoming_data(wave_pdu *pdu, int *err){
         free(packet_data.payload);
         
     } else {
-        printf("No packets found in the pcap file.\n");
+        printf("No packets found.\n");
         return 0;
     }
     pcap_close(handle);
