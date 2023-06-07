@@ -33,6 +33,7 @@ GPS_TX_LIBS = -lwave_sock -lcurl -lcjson
 FINAL_TX_LIBS = -lwave_sock -lm
 
 DEMO_WSAEXEC = app/bin/wsaexec
+DEMO_WSAWSMEXEC = app/bin/wsawsmexec
 DEMO_WSMEXEC = app/bin/wsmexec
 
 GPS_TX_DEMO_EXEC = app/bin/gpsexec
@@ -78,9 +79,15 @@ uninstall:
 
 # Run app/wsa_ex1.c demo
 gen.demo.wsa1:
-	$(CC) -o $(DEMO_WSAEXEC) $(DEMO_APP) $(DEMO_LIBS)
+	$(CC) -o $(DEMO_WSAWSMEXEC) $(DEMO_APP) $(DEMO_LIBS)
 
 run.demo.wsa1: 
+	@./$(DEMO_WSAWSMEXEC)
+
+gen.demo.wsa2:
+	$(CC) -o $(DEMO_WSAEXEC) $(DEMO_APP) $(DEMO_LIBS)
+
+run.demo.wsa2: 
 	@./$(DEMO_WSAEXEC)
 
 gen.demo.wsm1:
