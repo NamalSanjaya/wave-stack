@@ -106,30 +106,30 @@ void print_binx(uint8_t *buf, size_t size){
     printf("\n");
 }
 
-int main() {
-    int min = -10;    // Minimum value of the range
-    int max = 200;  // Maximum value of the range
+// int main() {
+//     int min = -10;    // Minimum value of the range
+//     int max = 200;  // Maximum value of the range
 
-    // Seed the random number generator with the current time
-    srand(time(NULL));
-    int count = 0;
-    while (count < 5){
-        // Generate a random number between min and max
-        int randomNum = (rand() % (max - min + 1)) + min;
+//     // Seed the random number generator with the current time
+//     srand(time(NULL));
+//     int count = 0;
+//     while (count < 5){
+//         // Generate a random number between min and max
+//         int randomNum = (rand() % (max - min + 1)) + min;
 
-        int32_t lat = (int32_t) randomNum;
-        int32_t longt = (int32_t) count;
-        app_send_wsm(lat, longt);
+//         int32_t lat = (int32_t) randomNum;
+//         int32_t longt = (int32_t) count;
+//         app_send_wsm(lat, longt);
 
-        count++;
-        usleep(25000);
-    }
-    printf("No.of packet sent: %d\n", count);
-    return 0;
-}
-
-// // demo for WSA
-// int main(){
-//     app_send_wsa();
+//         count++;
+//         usleep(25000);
+//     }
+//     printf("No.of packet sent: %d\n", count);
 //     return 0;
 // }
+
+// demo for WSA
+int main(){
+    app_send_wsa();
+    return 0;
+}

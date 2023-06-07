@@ -85,7 +85,7 @@ void *scheduler(void *arg){
         vi_cwmin, vi_cwmax, vi_aifsn, vi_txop_limit, vi_mand,
         vo_cwmin, vo_cwmax, vo_aifsn, vo_txop_limit, vo_mand, mib_db->pcitb);
 
-    if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
+    // if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
 
     pthread_mutex_lock(&mutex_slot);
     while(1) {
@@ -125,7 +125,7 @@ void *scheduler(void *arg){
         else if(slot == 1) {
             // printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
             // printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
-            send_wsm(mib_db->wrtb);
+            // send_wsm(mib_db->wrtb);
             /**
              * -------- Send Actual WSM --------
              * WSA has required information about WSM.
