@@ -92,7 +92,7 @@ void *scheduler(void *arg){
         if(slot == 0){
             printf("---------------------------------------------------------------\n");
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            broadcast_wsa(mib_db);
+            // broadcast_wsa(mib_db);
             // Check whether new WSA is available in UserAvailableService table
             if( (mib_db->uastb)->unprocessed_servs > 0 ){
                 fmt_info("Working on unprocessed requests in UserAvailableService table.");
@@ -125,7 +125,7 @@ void *scheduler(void *arg){
         else if(slot == 1) {
             // printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
             // printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
-            send_wsm(mib_db->wrtb);
+            // send_wsm(mib_db->wrtb);
             /**
              * -------- Send Actual WSM --------
              * WSA has required information about WSM.

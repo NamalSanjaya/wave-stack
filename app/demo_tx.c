@@ -5,7 +5,7 @@
 // header file to communicate with wave stack
 #include <libwave_sock.h>
 
-#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
+#define SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/sckfile"
 
 #define MUL_FACTOR 1e7
 

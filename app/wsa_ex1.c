@@ -6,7 +6,7 @@
 
 #include <libwave_sock.h>
 
-#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
+#define SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/sckfile"
 
 int app_send_wsa();
 int app_send_wsm(int32_t lat, int32_t longt);
