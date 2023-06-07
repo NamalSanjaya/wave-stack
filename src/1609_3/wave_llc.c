@@ -109,6 +109,7 @@ void dl_unitdatax_req(wave_pdu *pdu, uint8_t *src_addr, uint8_t *dest_addr, uint
         fmt_error(WAVE_WARN, "unable to send wsmp_wsm to MAC layer since failed to encode LLC frame");
         // return;
     }
+     fmt_info("Data encoding at LLC.");
     /* TODO: need to send pdu with relavent parameter to multi channel operational layer running in kernel space */
     // To verify wsm whole flow is working, we are configuring 1609.4 as userspace process which only use signal channal(no channel switching).
     // This is only for the testing purpose.
@@ -129,7 +130,7 @@ void dl_unitdata_ind(llc_pdu_metadata *llc_metadata, wave_pdu *pdu, UserAvailabl
     // Decode wsm
     // WSM-WaveShortMessage.indication(...., wsm_payload,...)
     struct wsmp_wsm *wsm = wsmp_wsm_decode(pdu, err, WSMP_STRICT);
-    fmt_info("Succefully decode the data LLC");
+    // fmt_info("Succefully decode the data LLC");
     free_pbuf(pdu);
     wsm_waveshortmsg_ind(wsm, uastb);
 }

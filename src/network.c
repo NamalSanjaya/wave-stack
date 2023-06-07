@@ -94,7 +94,7 @@ void write_tun(wave_pdu *pdu){
     if(total < 0) {
         fmt_error(WAVE_WARN, "Failed to write data to tap interface.");
     }
-    printf("Send to Tun: %ld\n", total);
+    printf("WSM data Send to GNU Radio\n");
     
     close(sockfd);
     free_pbuf(pdu);

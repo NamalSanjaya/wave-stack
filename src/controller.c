@@ -85,14 +85,14 @@ void *scheduler(void *arg){
         vi_cwmin, vi_cwmax, vi_aifsn, vi_txop_limit, vi_mand,
         vo_cwmin, vo_cwmax, vo_aifsn, vo_txop_limit, vo_mand, mib_db->pcitb);
 
-    if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
+    // if(pthread_create(&monitor_th, NULL, &monitor_wsm_wsa, (void *)mib_db) != 0) return NULL;
 
     pthread_mutex_lock(&mutex_slot);
     while(1) {
         if(slot == 0){
             printf("---------------------------------------------------------------\n");
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            broadcast_wsa(mib_db);
+            // broadcast_wsa(mib_db);
             // Check whether new WSA is available in UserAvailableService table
             if( (mib_db->uastb)->unprocessed_servs > 0 ){
                 fmt_info("Working on unprocessed requests in UserAvailableService table.");
@@ -123,8 +123,9 @@ void *scheduler(void *arg){
             */
         } 
         else if(slot == 1) {
+            printf("---------------------------------------------------------------\n");
             // printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            // printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
+            printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
             send_wsm(mib_db->wrtb);
             /**
              * -------- Send Actual WSM --------
@@ -244,6 +245,7 @@ void send_wsm(WSM_ReqTable_t *wsm_tb){
     int err[1];
     WSM_Req_t wsmr = get_nxt_wsm_req(wsm_tb, err);
     if(*err) return;
+    fmt_info("Read data from wsm buffer.\n");
     wsm_waveshortmsg_req(wsmr.chan_id, wsmr.timeslot, wsmr.data_rate, wsmr.tx_power, wsmr.channel_load, wsmr.info_elem_indicator, wsmr.prority, wsmr.wsm_expire_time,
         wsmr.len, wsmr.data, wsmr.peer_mac_addr, wsmr.psid);
 }
@@ -270,7 +272,7 @@ void *monitor_wsm_wsa(void *arg){
         }
         // printf("Pcap read: %ld\n", total);
         if(total == 0) continue;
-        if(slot == 1) continue;
+        // if(slot == 1) continue;
         dl_recv(pdu,  mib_db->uastb, err);
         usleep(100000);
     }
@@ -285,7 +287,7 @@ size_t capture_incoming_data(wave_pdu *pdu, int *err){
     *err = 0;
     handle = pcap_open_offline(PCAPFILE, errbuf);
     if (handle == NULL) {
-        fprintf(stderr, "Error opening pcap file: %s\n", errbuf);
+        fprintf(stderr, "Error: %s\n", errbuf);
         *err = 1;
         return 0;
     }
@@ -302,7 +304,7 @@ size_t capture_incoming_data(wave_pdu *pdu, int *err){
         free(packet_data.payload);
         
     } else {
-        printf("No packets found.\n");
+        printf("No packet captured.\n");
         return 0;
     }
     pcap_close(handle);

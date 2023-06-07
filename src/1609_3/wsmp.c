@@ -392,6 +392,7 @@ enum confirm_result_code wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot ti
           fmt_error(WAVE_WARN, "failed to encode wsm with err code");
           return rejected_unspecified;
      }
+     fmt_info("Data encoding at WSMP.");
      // TODO: Resolve this logic
      // WSM data to the LLC sublayer
      char *device = get_network_device();

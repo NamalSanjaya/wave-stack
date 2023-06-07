@@ -184,7 +184,7 @@ int8_t app_wsm_waveshortmsg_req(uint8_t chan_id, enum time_slot timeslot, uint8_
         printf("went wrong..\n");
         return -1;
     }
-    printf("sent to stack: %ld\n", total);
+    printf("sent to stack: %ldB\n", total);
     // Close the socket
     close(socket_fd);
     free(wsmr);

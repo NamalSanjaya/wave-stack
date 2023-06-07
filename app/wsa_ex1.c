@@ -76,6 +76,7 @@ int app_send_wsm(int32_t lat, int32_t longt){
         return 1;
     }
     printf("successfully send the WSM request to stack\n");
+    printf("------------------------------------------------------------\n");
     return 0;
 }
 
@@ -108,21 +109,21 @@ void print_binx(uint8_t *buf, size_t size){
 
 int main() {
     int min = -10;    // Minimum value of the range
-    int max = 200;  // Maximum value of the range
+    int max = 1e5;  // Maximum value of the range
 
     // Seed the random number generator with the current time
     srand(time(NULL));
     int count = 0;
-    while (count < 5){
+    while (1){
         // Generate a random number between min and max
         int randomNum = (rand() % (max - min + 1)) + min;
 
         int32_t lat = (int32_t) randomNum;
-        int32_t longt = (int32_t) count;
+        int32_t longt = lat + 177;
         app_send_wsm(lat, longt);
 
         count++;
-        usleep(25000);
+        usleep(100000);
     }
     printf("No.of packet sent: %d\n", count);
     return 0;
