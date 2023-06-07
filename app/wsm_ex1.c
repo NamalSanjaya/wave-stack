@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <libwave_sock.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
 #define WAVE_SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/wave_sckfile"
@@ -18,8 +19,19 @@ int main(){
 }
 
 void callback(local_resp_t *resp){
-    print_binx_temp(resp->buf, resp->data_size);
-    printf("data-size: %ld...\n", resp->data_size);
+    uint32_t lat = 0;
+    uint32_t longt = 0;
+
+    // Extract the first 32 bits
+    for (int i = 0; i < 4; i++) {
+        lat |= ( (uint32_t) *((resp->buf)+i) << (24 - (8 * i)));
+    }
+
+    // Extract the second 32 bits
+    for (int i = 4; i < 8; i++) {
+        longt |= ( (uint32_t) *((resp->buf)+i) << (24 - (8 * (i - 4))));
+    }
+    printf("Latitude: %d, Longitude: %d\n", lat, longt);
 }
 
 void callback_old(local_resp_t *resp){

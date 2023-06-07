@@ -500,5 +500,5 @@ void wsm_waveshortmsg_ind(struct wsmp_wsm *wsm, UserAvailableServiceTable_t *uas
           fmt_error(WAVE_WARN, "Unable to send to user application socket.");
           return;
      }
-    
+    fmt_info("Send recieved WSM data to User application.");
 }
