@@ -92,7 +92,7 @@ void *scheduler(void *arg){
         if(slot == 0){
             printf("---------------------------------------------------------------\n");
             printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            broadcast_wsa(mib_db);
+            // broadcast_wsa(mib_db);
             // Check whether new WSA is available in UserAvailableService table
             if( (mib_db->uastb)->unprocessed_servs > 0 ){
                 fmt_info("Working on unprocessed requests in UserAvailableService table.");
@@ -123,9 +123,10 @@ void *scheduler(void *arg){
             */
         } 
         else if(slot == 1) {
+            printf("---------------------------------------------------------------\n");
             // printf("time slot 0: TX: BroadcastWSA()  | RX: MonitorWSA()\n");
-            // printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
-            send_wsm(mib_db->wrtb);
+            printf("time slot 1: TX: SendActualWSM() | RX: ListenToIncomingWSM()\n");
+            // send_wsm(mib_db->wrtb);
             /**
              * -------- Send Actual WSM --------
              * WSA has required information about WSM.
@@ -270,7 +271,6 @@ void *monitor_wsm_wsa(void *arg){
         }
         // printf("Pcap read: %ld\n", total);
         if(total == 0) continue;
-        if(slot == 1) continue;
         dl_recv(pdu,  mib_db->uastb, err);
         usleep(100000);
     }
@@ -285,7 +285,7 @@ size_t capture_incoming_data(wave_pdu *pdu, int *err){
     *err = 0;
     handle = pcap_open_offline(PCAPFILE, errbuf);
     if (handle == NULL) {
-        fprintf(stderr, "Error opening pcap file: %s\n", errbuf);
+        fprintf(stderr, "Error : %s\n", errbuf);
         *err = 1;
         return 0;
     }

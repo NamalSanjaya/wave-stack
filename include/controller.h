@@ -9,11 +9,11 @@
 #include "pdu_buf.h"
 
 #define CH_INTERVAL 100e3  // 50ms
-#define SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/sckfile"
-#define WAVE_SCKFILE "/home/sdrns/workspace/fyp_work/layer_development/wave_stack/test/bin/wave_sckfile"
+#define SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/sckfile"
+#define WAVE_SCKFILE "/home/suhail/workspace2/fyp/wave-stack/test/bin/wave_sckfile"
 
-#define PCAPFILE "/home/sdrns/workspace/fyp_work/demo/june7/feature_demo/1_feature_wsm.pcap"   // For wireshark packet capturing
-
+#define PCAPFILE "/home/suhail/workspace2/fyp/demo/june7/feature-demo/1_wsm_feat.pcap"   // For wireshark packet capturing
+// /home/suhail/workspace2/fyp/demo/june7/feature-demo/1_wsm_feat.pcap
 
 // This struct use for final demo only. Not a part of stack
 struct PacketData {
