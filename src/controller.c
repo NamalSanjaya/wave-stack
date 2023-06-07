@@ -222,7 +222,7 @@ size_t capture_incoming_data(wave_pdu *pdu, int *err){
     *err = 0;
     handle = pcap_open_offline(PCAPFILE, errbuf);
     if (handle == NULL) {
-        fprintf(stderr, "Error opening pcap file: %s\n", errbuf);
+        fprintf(stderr, "Error: %s\n", errbuf);
         *err = 1;
         return 0;
     }
@@ -239,7 +239,7 @@ size_t capture_incoming_data(wave_pdu *pdu, int *err){
         free(packet_data.payload);
         
     } else {
-        printf("No packets found in the pcap file.\n");
+        printf("No packets captured.\n");
         return 0;
     }
     pcap_close(handle);
